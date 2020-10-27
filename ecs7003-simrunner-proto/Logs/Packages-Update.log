@@ -52,3 +52,14 @@ Update Mode: updateDependencies
 
 The following packages were updated:
   com.unity.ide.vscode from version 1.2.1 to 1.2.2
+
+=== Mon Oct 26 14:19:30 2020
+
+Packages were changed.
+Update Mode: mergeDefaultDependencies
+
+The following packages were added:
+  com.unity.cinemachine@2.3.4
+  com.unity.ext.nunit@1.0.0
+  com.unity.postprocessing@2.2.2
+  com.unity.recorder@2.0.3-preview.1
