@@ -47,20 +47,18 @@ public class MovementInput : MonoBehaviour {
 	void Update () {
 		InputMagnitude ();
 
-
 		// modified for jump
         isGrounded = controller.isGrounded;
         if (isGrounded && Input.GetButton("Jump"))
         {
-            verticalVel = 60f;
+			anim.SetTrigger("Jumping");
+			verticalVel = 30f;
 		}
         else
         {
             verticalVel -= 0.5f;
         }
         moveVector = new Vector3(0, verticalVel * .2f * Time.deltaTime, 0);
-		anim.SetTrigger("Jumping");
-		//anim.SetTrigger("Falling"); // not a good place; TODO DIX
 		controller.Move(moveVector);
 		
 
