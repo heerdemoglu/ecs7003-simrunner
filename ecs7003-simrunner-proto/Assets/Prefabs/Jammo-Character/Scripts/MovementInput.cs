@@ -47,20 +47,26 @@ public class MovementInput : MonoBehaviour {
 	void Update () {
 		InputMagnitude ();
 
+
+		// modified for jump
         isGrounded = controller.isGrounded;
-        if (isGrounded)
+        if (isGrounded && Input.GetButton("Jump"))
         {
-            verticalVel -= 0;
-        }
+            verticalVel = 60f;
+		}
         else
         {
-            verticalVel -= 1;
+            verticalVel -= 0.5f;
         }
         moveVector = new Vector3(0, verticalVel * .2f * Time.deltaTime, 0);
-        controller.Move(moveVector);
+		anim.SetTrigger("Jumping");
+		//anim.SetTrigger("Falling"); // not a good place; TODO DIX
+		controller.Move(moveVector);
+		
 
 
-    }
+
+	}
 
     void PlayerMoveAndRotation() {
 		InputX = Input.GetAxis ("Horizontal");
@@ -113,6 +119,7 @@ public class MovementInput : MonoBehaviour {
 		Speed = new Vector2(InputX, InputZ).sqrMagnitude;
 
         //Physically move player
+			
 
 		if (Speed > allowPlayerRotation) {
 			anim.SetFloat ("Blend", Speed, StartAnimTime, Time.deltaTime);
