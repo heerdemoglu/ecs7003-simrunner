@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO.MemoryMappedFiles;
 using Unity.Profiling;
 using UnityEngine;
 
@@ -19,6 +20,8 @@ public class RigidMovementController : MonoBehaviour
 
 	public bool doubleJump; // ToDo
 	public bool isWallRunning;
+	public Vector3 left, right, up, down;
+	Vector3 finPosition;
 
 	[Header("Animation Smoothing")]
 	[Range(0, 1f)]
@@ -30,7 +33,6 @@ public class RigidMovementController : MonoBehaviour
 	[Range(0, 1f)]
 	public float StopAnimTime = 0.15f;
 	public float Speed;
-	Vector3 oldMove = new Vector3(0.01f, 0f, 0.01f);
 
 	// For Jammo pre-coded methods: - May not work now.
 	public float desiredRotationSpeed = 0.1f;
@@ -40,6 +42,7 @@ public class RigidMovementController : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
+
 		anim = this.GetComponent<Animator>(); // Get the animator
 		cam = Camera.main;
 		Cursor.lockState = CursorLockMode.Locked;
@@ -51,43 +54,59 @@ public class RigidMovementController : MonoBehaviour
 
 		// Regular WASD direction as we start with y rotation at 0.
 		float xAxis = (float)(Input.GetAxis("Horizontal")); // left right //  * Math.Sin(bearingAngle)
-		float zAxis = -(float)(Input.GetAxis("Vertical")); // up down // * Math.Cos(bearingAngle)
+		float zAxis = (float)(Input.GetAxis("Vertical")); // up down // * Math.Cos(bearingAngle)
 
-		/*
-		if (transform.eulerAngles.y >= -45 || transform.eulerAngles.y < 45)
+		if (Input.GetKey(KeyCode.A))
+		{
+			left = Vector3.left;
+		}
+		else
         {
-			zAxis = (float)(Input.GetAxis("Horizontal")); // left right //  * Math.Sin(bearingAngle)
-			xAxis = (float)(Input.GetAxis("Vertical")); // up down // * Math.Cos(bearingAngle)
+			left = Vector3.zero;
+        }
+
+		if (Input.GetKey(KeyCode.W))
+		{
+			up = Vector3.forward;
+		}
+		else
+		{
+			up = Vector3.zero;
 		}
 
-		if (transform.eulerAngles.y < -45 || transform.eulerAngles.y >= -135)
+		if (Input.GetKey(KeyCode.S))
 		{
-			zAxis = -(float)(Input.GetAxis("Horizontal")); // left right //  * Math.Sin(bearingAngle)
-			zAxis = (float)(Input.GetAxis("Vertical")); // up down // * Math.Cos(bearingAngle)
+			down = Vector3.back;
+		}
+		else
+		{
+			down = Vector3.zero;
 		}
 
-		if(transform.eulerAngles.y < -135 || transform.eulerAngles.y > 135)
+		if (Input.GetKey(KeyCode.D))
 		{
-			xAxis = -(float)(Input.GetAxis("Horizontal")); // left right //  * Math.Sin(bearingAngle)
-			zAxis = -(float)(Input.GetAxis("Vertical")); // up down // * Math.Cos(bearingAngle)
+			right = Vector3.right;
 		}
-		*/
+		else
+		{
+			right = Vector3.zero;
+		}
+
+		Vector3 MoveForce = (left + right + up + down) * moveSensi;
+
+		if (MoveForce != Vector3.zero)
+			finPosition = MoveForce;
+
+		GetComponent<Rigidbody>().AddForce(MoveForce);
 
 		Speed = new Vector2(xAxis, zAxis).sqrMagnitude;
-
-		// Apply the movement wrt object rotation: (X-Z direction)
-		Vector3 movement = (new Vector3(xAxis, 0, zAxis)).normalized;
-
-		GetComponent<Rigidbody>().AddForce(movement * moveSensi * Time.fixedDeltaTime, ForceMode.Impulse);
 
 		// Apply the animation: 
 		if (transform.GetComponent<Rigidbody>().velocity != Vector3.zero)
 		{
-
 			anim.SetFloat("Blend", Speed, StartAnimTime, Time.deltaTime);
-			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(oldMove), Time.deltaTime * RotateSpeed);
-
-
+			//transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(MoveForce), Time.deltaTime * RotateSpeed);
+			LookAt(finPosition);
 		} else
         {
 			anim.SetFloat("Blend", Speed, StopAnimTime, Time.deltaTime);
@@ -99,10 +118,6 @@ public class RigidMovementController : MonoBehaviour
 			GetComponent<Rigidbody>().AddForce(new Vector3(0, 1, 0) * jumpSensi, ForceMode.Impulse);
 			isGrounded = false;
 		}
-
-		if (movement != Vector3.zero)
-			oldMove = movement;
-
 	}
 
 	// Rotates player to look at a vector position
