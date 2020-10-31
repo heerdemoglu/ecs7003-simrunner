@@ -3,7 +3,15 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - PlayerEyes
+  - Floor
+  - Double Jump Wall
+  - Speed Up Wall
+  - Slow Down Wall
+  - Wall Break
+  - Tiles
+  - Death
   layers:
   - Default
   - TransparentFX
