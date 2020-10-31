@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-public class TimerController : MonoBehaviour
+public class GameController : MonoBehaviour
 {
     public Text timerText;
     private float startTime;
     private bool stopTimer = false;
+    private float endTime;
     // Start is called before the first frame update
     void Start()
     {
@@ -17,7 +18,9 @@ public class TimerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {   if (stopTimer)
+        {
             return;
+        }
         float timer = Time.time - startTime;//in seconds
         
 
@@ -29,8 +32,12 @@ public class TimerController : MonoBehaviour
     }
     public void StopTime()
     {
+        endTime = Time.time-startTime;
         stopTimer = true;
         timerText.color = Color.red;
+        
+        Debug.Log(endTime);
+
     }
 }
 

@@ -5,15 +5,14 @@ using UnityEngine;
 
 public class StopTimer : MonoBehaviour
 {
-    private TimerController timeController;
+    private GameController gameController;
     private void Start()
     {
-        GameObject gameC = GameObject.FindGameObjectWithTag("TimerController");
-        timeController = gameC.GetComponent<TimerController>();
+        GameObject gameC = GameObject.FindGameObjectWithTag("GameController");
+        gameController = gameC.GetComponent<GameController>();
     }
     void OnTriggerEnter(Collider other)
     {
-        timeController.StopTime();
-        
+        gameController.StopTime();
     }
 }
