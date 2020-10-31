@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 using System.IO.MemoryMappedFiles;
 using Unity.Profiling;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 public class RigidMovementController : MonoBehaviour
 {
@@ -22,6 +22,9 @@ public class RigidMovementController : MonoBehaviour
 	public bool isWallRunning;
 	public Vector3 left, right, up, down;
 	Vector3 finPosition;
+
+	//private bool isGameOver;
+	public Text GameOver;
 
 	[Header("Animation Smoothing")]
 	[Range(0, 1f)]
@@ -42,8 +45,9 @@ public class RigidMovementController : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-
+		//isGameOver = false;
 		anim = this.GetComponent<Animator>(); // Get the animator
+		anim.SetBool("isJumping", false);
 		cam = Camera.main;
 		Cursor.lockState = CursorLockMode.Locked;
 	}
@@ -116,8 +120,16 @@ public class RigidMovementController : MonoBehaviour
 		if (Input.GetButton("Jump") && isGrounded)
 		{
 			GetComponent<Rigidbody>().AddForce(new Vector3(0, 1, 0) * jumpSensi, ForceMode.Impulse);
+			anim.SetBool("isJumping", true);
 			isGrounded = false;
 		}
+
+
+		if (isGrounded)
+		{
+			anim.SetBool("isJumping", false);
+		}
+
 	}
 
 	// Rotates player to look at a vector position
@@ -139,10 +151,20 @@ public class RigidMovementController : MonoBehaviour
 		t.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(desiredMoveDirection), desiredRotationSpeed);
 	}
 
-
-	private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
-		if (collision.gameObject.tag == "Floor")
+		if (other.gameObject.tag == "Death")
+        {
+			//isGameOver = true;
+			GameOver.text = "YOU DIED";
+		}
+			
+
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+		if (collision.gameObject.tag == "Floor" || collision.gameObject.tag == "Death")
 			isGrounded = true;
     }
 }
