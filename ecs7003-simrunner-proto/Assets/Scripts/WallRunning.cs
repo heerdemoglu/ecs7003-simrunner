@@ -5,9 +5,11 @@ using UnityEngine;
 public class WallRunning : MonoBehaviour
 {
 
-    private float upForce = 3f;
+    public float upForce;
+    public float rightForce;
 
     public Transform body;
+    Vector3 rot;
 
     private float distanceFromLeft;
     private float distanceFromRight;
@@ -17,6 +19,11 @@ public class WallRunning : MonoBehaviour
     [SerializeField] private bool onLeftWall;
     [SerializeField] private bool onRightWall;
     [SerializeField] private bool isWallRunning;
+
+    private void Awake()
+    {
+        rot = GetComponent<Rigidbody>().transform.eulerAngles;
+    }
 
     private void checkWall()
     {
@@ -60,8 +67,8 @@ public class WallRunning : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
 
-        if (collision.transform.CompareTag("Tiles") && collision.transform.CompareTag("Speed Up Wall") && collision.transform.CompareTag("Slow Down Wall")
-            && collision.transform.CompareTag("Wall Break") && collision.transform.CompareTag("Double Jump Wall"))
+        if (collision.transform.CompareTag("Tiles") || collision.transform.CompareTag("Speed Up Wall") || collision.transform.CompareTag("Slow Down Wall")
+            || collision.transform.CompareTag("Wall Break") || collision.transform.CompareTag("Double Jump Wall"))
         {
             isWallRunning = true;
         }
@@ -69,19 +76,20 @@ public class WallRunning : MonoBehaviour
 
     private void OnCollisionStay(Collision collision)
     {
-        if(collision.transform.CompareTag("Tiles") && collision.transform.CompareTag("Speed Up Wall") && collision.transform.CompareTag("Slow Down Wall")
-            && collision.transform.CompareTag("Wall Break") && collision.transform.CompareTag("Double Jump Wall"))
+        if(collision.transform.CompareTag("Tiles") || collision.transform.CompareTag("Speed Up Wall") || collision.transform.CompareTag("Slow Down Wall")
+            || collision.transform.CompareTag("Wall Break") || collision.transform.CompareTag("Double Jump Wall"))
         {
 
-            if (Input.GetKey(KeyCode.Space) && onLeftWall) {
+            //transform.rotation = Quaternion.FromToRotation(GetComponent<Rigidbody>().transform.eulerAngles, collision.contacts[0].normal);
+            if (onLeftWall) {
                 GetComponent<Rigidbody>().AddForce(Vector3.up * upForce, ForceMode.Impulse);
-                GetComponent<Rigidbody>().AddForce(transform.right * upForce, ForceMode.Impulse);
+                GetComponent<Rigidbody>().AddForce(transform.right * rightForce, ForceMode.Impulse);
             }
 
-            if (Input.GetKey(KeyCode.Space) && onRightWall)
+            if (onRightWall)
             {
                 GetComponent<Rigidbody>().AddForce(Vector3.up * upForce, ForceMode.Impulse);
-                GetComponent<Rigidbody>().AddForce(-transform.right * upForce, ForceMode.Impulse);
+                GetComponent<Rigidbody>().AddForce(-transform.right * rightForce, ForceMode.Impulse);
             }
         }
     }
@@ -90,6 +98,9 @@ public class WallRunning : MonoBehaviour
     {
         if (collision.transform.CompareTag("Tiles") && collision.transform.CompareTag("Speed Up Wall") && collision.transform.CompareTag("Slow Down Wall")
             && collision.transform.CompareTag("Wall Break") && collision.transform.CompareTag("Double Jump Wall"))
+        { 
             isWallRunning = false;
+            //transform.rotation = Quaternion.FromToRotation(GetComponent<Rigidbody>().transform.eulerAngles, rot);
+        } 
     }
 }

@@ -12,6 +12,7 @@ TagManager:
   - Wall Break
   - Tiles
   - Death
+  - Win
   layers:
   - Default
   - TransparentFX

@@ -158,13 +158,28 @@ public class RigidMovementController : MonoBehaviour
 			//isGameOver = true;
 			GameOver.text = "YOU DIED";
 		}
-			
 
-    }
+	}
 
     private void OnCollisionEnter(Collision collision)
     {
-		if (collision.gameObject.tag == "Floor" || collision.gameObject.tag == "Death")
+		if (collision.gameObject.tag == "Floor" || collision.transform.CompareTag("Tiles") || collision.transform.CompareTag("Speed Up Wall") || collision.transform.CompareTag("Slow Down Wall")
+			|| collision.transform.CompareTag("Wall Break") || collision.transform.CompareTag("Double Jump Wall"))
+		{ 
+			isGrounded = true; 
+			if(collision.transform.CompareTag("Wall Break"))
+            {
+				collision.gameObject.SetActive(false);
+            }
+		
+		}
+
+		if (collision.gameObject.tag == "Win")
+		{
+			//isGameOver = true;
 			isGrounded = true;
-    }
+			GameOver.text = "YOU WIN!";
+		}
+
+	}
 }
