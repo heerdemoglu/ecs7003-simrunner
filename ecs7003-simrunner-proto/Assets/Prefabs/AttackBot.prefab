@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5205284865050035925}
-  - component: {fileID: 5205284865050035924}
   m_Layer: 0
   m_Name: AttackBot
   m_TagString: Bot
@@ -32,22 +31,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5205284865050035924
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5205284865050035930}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ecf715c285e69e747b2ab5ecb9f2117b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bullet: {fileID: 8865290358017082279, guid: 48c350fc32f0e334db192ae6c524819d, type: 3}
-  spawnValues: {fileID: 3008361885154028800}
-  startWait: 0.5
-  spawnWait: 2
 --- !u!1001 &5205284866583127558
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -113,10 +96,5 @@ PrefabInstance:
 --- !u!4 &5201034923483413784 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4832031578413854, guid: 4efdc095f88074e53a4f28617077b108, type: 3}
-  m_PrefabInstance: {fileID: 5205284866583127558}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &3008361885154028800 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 7026523838423321350, guid: 4efdc095f88074e53a4f28617077b108, type: 3}
   m_PrefabInstance: {fileID: 5205284866583127558}
   m_PrefabAsset: {fileID: 0}

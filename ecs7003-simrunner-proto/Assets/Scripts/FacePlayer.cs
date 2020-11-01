@@ -52,7 +52,7 @@ public class FacePlayer : MonoBehaviour
     {
         
         if (other.gameObject.tag == "Player")
-        {
+        {//player in range - bot faces player
             inRange = true;
             bot.transform.LookAt(other.gameObject.transform.position);
         }
