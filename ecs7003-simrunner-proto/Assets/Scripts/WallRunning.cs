@@ -67,8 +67,11 @@ public class WallRunning : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
 
-        if (collision.transform.CompareTag("Tiles") || collision.transform.CompareTag("Speed Up Wall") || collision.transform.CompareTag("Slow Down Wall")
-            || collision.transform.CompareTag("Wall Break") || collision.transform.CompareTag("Double Jump Wall"))
+        if (collision.transform.CompareTag("Tiles") 
+            || collision.transform.CompareTag("Speed Up Wall") 
+            || collision.transform.CompareTag("Slow Down Wall")
+            || collision.transform.CompareTag("Wall Break") 
+            || collision.transform.CompareTag("Double Jump Wall"))
         {
             isWallRunning = true;
         }
@@ -76,8 +79,11 @@ public class WallRunning : MonoBehaviour
 
     private void OnCollisionStay(Collision collision)
     {
-        if(collision.transform.CompareTag("Tiles") || collision.transform.CompareTag("Speed Up Wall") || collision.transform.CompareTag("Slow Down Wall")
-            || collision.transform.CompareTag("Wall Break") || collision.transform.CompareTag("Double Jump Wall"))
+        if(collision.transform.CompareTag("Tiles") 
+            || collision.transform.CompareTag("Speed Up Wall") 
+            || collision.transform.CompareTag("Slow Down Wall")
+            || collision.transform.CompareTag("Wall Break") 
+            || collision.transform.CompareTag("Double Jump Wall"))
         {
 
             //transform.rotation = Quaternion.FromToRotation(GetComponent<Rigidbody>().transform.eulerAngles, collision.contacts[0].normal);
@@ -96,8 +102,11 @@ public class WallRunning : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.transform.CompareTag("Tiles") && collision.transform.CompareTag("Speed Up Wall") && collision.transform.CompareTag("Slow Down Wall")
-            && collision.transform.CompareTag("Wall Break") && collision.transform.CompareTag("Double Jump Wall"))
+        if (collision.transform.CompareTag("Tiles") 
+            && collision.transform.CompareTag("Speed Up Wall") 
+            && collision.transform.CompareTag("Slow Down Wall")
+            && collision.transform.CompareTag("Wall Break") 
+            && collision.transform.CompareTag("Double Jump Wall"))
         { 
             isWallRunning = false;
             //transform.rotation = Quaternion.FromToRotation(GetComponent<Rigidbody>().transform.eulerAngles, rot);
