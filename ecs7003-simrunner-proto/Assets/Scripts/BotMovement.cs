@@ -11,8 +11,8 @@ public class BotMovement : MonoBehaviour
     //public GameObject toMove;
     public float speed;
 
-    public float startWait;
-    public float turnWait;
+    //public float startWait;
+    //public float turnWait;
 
     public Transform target1;
     public Transform target2;

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - PlayerEyes
   - TimerController
+  - Bot
   layers:
   - Default
   - TransparentFX
