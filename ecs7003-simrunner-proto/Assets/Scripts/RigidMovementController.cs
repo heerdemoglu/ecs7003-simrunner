@@ -64,7 +64,7 @@ public class RigidMovementController : MonoBehaviour
 		blendTreeHash = Animator.StringToHash("Blend");
 		isJumpingHash = Animator.StringToHash("isJumping");
 
-		// reset isJumping at start
+		// initialise isJumping at start
 		anim.SetBool(isJumpingHash, false);
 
 		// get camera reference and lock cursor
@@ -135,7 +135,6 @@ public class RigidMovementController : MonoBehaviour
             {
 				collision.gameObject.SetActive(false);
             }
-		
 		}
 
 		if (collision.gameObject.tag == "Win")
@@ -144,7 +143,6 @@ public class RigidMovementController : MonoBehaviour
 			isGrounded = true;
 			GameOver.text = "YOU WIN!";
 		}
-
 	}
 
 	// Register movement input
