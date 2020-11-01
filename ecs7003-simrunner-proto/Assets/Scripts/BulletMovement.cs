@@ -10,10 +10,10 @@ public class BulletMovement : MonoBehaviour
     private Vector3 direction;
     void Start()
     {
-        //bulletDirection = GameObject.FindGameObjectWithTag("Bot");
-        //direction = bulletDirection.transform.forward;
-        transform.LookAt(GameObject.FindGameObjectWithTag("Player").transform);
-        direction = transform.forward;
+        bulletDirection = GameObject.FindGameObjectWithTag("Bot");
+        direction = bulletDirection.transform.forward;
+        //transform.LookAt(GameObject.FindGameObjectWithTag("Player").transform);
+        //direction = transform.forward;
     }
 
     // Update is called once per frame

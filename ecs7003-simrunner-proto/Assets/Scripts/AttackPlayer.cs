@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
-public class FacePlayer : MonoBehaviour
+public class AttackPlayer : MonoBehaviour
 {
     // Start is called before the first frame update
 
