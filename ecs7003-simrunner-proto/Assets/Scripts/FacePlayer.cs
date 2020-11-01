@@ -20,15 +20,16 @@ public class FacePlayer : MonoBehaviour
     IEnumerator SpawnBullet()
     {
         yield return new WaitForSeconds(startWait);
-        while ( true)//inRange ==
+        while ( true)//
         {
-
-            Vector3 spawnPosition = spawnValues.position;
-            UnityEngine.Debug.Log("spawn bullet");
-            Quaternion spawnRotation = Quaternion.identity;
+            //if (inRange == true)
+            //{
+                Vector3 spawnPosition = spawnValues.position;
+                //UnityEngine.Debug.Log("spawn bullet");
+                Quaternion spawnRotation = Quaternion.identity;
                 Instantiate(bullet, spawnValues.position, spawnRotation);
                 yield return new WaitForSeconds(spawnWait);
-            
+           // }
             
         }
         yield return new WaitForSeconds(spawnWait);
