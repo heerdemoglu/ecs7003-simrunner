@@ -35,7 +35,7 @@ public class FacePlayer : MonoBehaviour
            // }
             
         }
-        yield return new WaitForSeconds(spawnWait);
+        //yield return new WaitForSeconds(spawnWait);
     }
 
     void Start()

@@ -14,13 +14,14 @@ public class BotMovement : MonoBehaviour
     //public float startWait;
     //public float turnWait;
 
-    public Transform target1;
-    public Transform target2;
+    //public Transform target1;
+    //public Transform target2;
 
     private float distance;
     private Vector3 destination;
     private Vector3 startPos;
 
+    public GameObject zone;
 
     private bool playerInRange;
     private GameObject player;
@@ -30,8 +31,8 @@ public class BotMovement : MonoBehaviour
         playerInRange = false;
         player = GameObject.FindGameObjectWithTag("Player");
 
-        destination = new Vector3(10f, 0f, 0f);//target2.position;
-        startPos = new Vector3(-10f, 0f, 0f);//target1.position;
+        //destination = new Vector3(10f, 0f, 0f);//target2.position;
+        //startPos = new Vector3(-10f, 0f, 0f);//target1.position;
 
         distance = Vector3.Distance(startPos, destination);
 
@@ -60,11 +61,12 @@ public class BotMovement : MonoBehaviour
     }
 
 
-    private void inRange()
+    private void isInRange(bool inRange)
     {
-        playerInRange = true;
-        Vector3 playerpos = player.transform.position;
-        transform.LookAt(playerpos);
+        playerInRange = inRange;
+        UnityEngine.Debug.Log(" call range");
+        //Vector3 playerpos = player.transform.position;
+        //transform.LookAt(playerpos);
         //unityengine.Debug.log("inrange");
     }
     // Update is called once per frame
