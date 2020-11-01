@@ -13,22 +13,25 @@ public class FacePlayer : MonoBehaviour
     // public Vector3 spawnValues;
     public Transform spawnValues;
 
-    public float startWait;
+    //public float startWait;
     public float spawnWait;
     //public float waveWait;
     private bool inRange = false;
     IEnumerator SpawnBullet()
     {
-        yield return new WaitForSeconds(startWait);
+        
+        //yield return new WaitForSeconds(startWait);
         while ( true)//
         {
             //if (inRange == true)
             //{
-                Vector3 spawnPosition = spawnValues.position;
-                //UnityEngine.Debug.Log("spawn bullet");
-                Quaternion spawnRotation = Quaternion.identity;
-                Instantiate(bullet, spawnValues.position, spawnRotation);
-                yield return new WaitForSeconds(spawnWait);
+            yield return new WaitUntil(() => inRange==true);
+
+            Vector3 spawnPosition = spawnValues.position;
+            //UnityEngine.Debug.Log("spawn bullet");
+            Quaternion spawnRotation = Quaternion.identity;
+            Instantiate(bullet, spawnValues.position, spawnRotation);
+            yield return new WaitForSeconds(spawnWait);
            // }
             
         }
@@ -62,7 +65,7 @@ public class FacePlayer : MonoBehaviour
             //StartCoroutine(SpawnBullet());
             inRange = true;
             bot.transform.LookAt(other.gameObject.transform.position);
-            UnityEngine.Debug.Log("in collider");
+            //UnityEngine.Debug.Log("in collider");
         }
     }
 
