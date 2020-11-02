@@ -1,6 +1,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 //This script requires you to have setup your animator with 3 parameters, "InputMagnitude", "InputX", "InputZ"
@@ -23,7 +24,7 @@ public class MovementInput : MonoBehaviour {
 	public CharacterController controller;
 	public bool isGrounded;
 
-    [Header("Animation Smoothing")]
+	[Header("Animation Smoothing")]
     [Range(0, 1f)]
     public float HorizontalAnimSmoothTime = 0.2f;
     [Range(0, 1f)]
@@ -47,20 +48,24 @@ public class MovementInput : MonoBehaviour {
 	void Update () {
 		InputMagnitude ();
 
+		// modified for jump
         isGrounded = controller.isGrounded;
-        if (isGrounded)
+        if (isGrounded && Input.GetButton("Jump"))
         {
-            verticalVel -= 0;
-        }
+			//anim.SetTrigger("Jumping");
+			verticalVel = 30f;
+		}
         else
         {
-            verticalVel -= 1;
+            verticalVel -= 0.5f;
         }
         moveVector = new Vector3(0, verticalVel * .2f * Time.deltaTime, 0);
-        controller.Move(moveVector);
+		controller.Move(moveVector);
+		
 
 
-    }
+
+	}
 
     void PlayerMoveAndRotation() {
 		InputX = Input.GetAxis ("Horizontal");
@@ -113,7 +118,6 @@ public class MovementInput : MonoBehaviour {
 		Speed = new Vector2(InputX, InputZ).sqrMagnitude;
 
         //Physically move player
-
 		if (Speed > allowPlayerRotation) {
 			anim.SetFloat ("Blend", Speed, StartAnimTime, Time.deltaTime);
 			PlayerMoveAndRotation ();
