@@ -4,6 +4,11 @@ using System.Collections.Specialized;
 using UnityEngine.UI;
 using UnityEngine;
 
+
+/**
+ * Other implementation of player controller, it doesnt use WASD, directly uses Horizontal and Vertical Inputs.
+ * It requires clamping setting fixed speed etc. Not used in the final product.
+ */
 public class PlayerController : MonoBehaviour
 {
     public float speed;//create a public variable of type float

@@ -9,23 +9,25 @@ using UnityEngine.UI;
 
 public class RigidMovementController : MonoBehaviour
 {
-
+	// Some of the code is inspired by CharacterController used by Jammo-Character Asset Scripts:
+	// This one uses Rigidbody instead of Character controller to utilize Physics of Unity Engine.
 	[Header("Movement Parameters")]
-	public float moveSensi;
-	public float jumpSensi;
-	public bool isGrounded = true;
-	public float RotateSpeed;
-	public Animator anim;
+	public float moveSensi; // sensitivity for movement
+	public float jumpSensi; // sensitivity for jump
+	public bool isGrounded = true; // single jump requires this to reset jump otherwise pressing space makes you fly
+	public float RotateSpeed; // set animation of rotation
+	public Animator anim; // animator used to utilize animations (used and modified assets from Jammo Player)
 	public float bearingAngle; // important for animation and conservation of space
 
 	public bool doubleJump; // ToDo
-	public bool isWallRunning;
+	public bool isWallRunning; 
 	public Vector3 left, right, up, down, jump;
 	Vector3 finPosition;
 
 	//private bool isGameOver;
 	public Text GameOver;
 
+	// Inspired from JammoPlayer asset. Used along with animator to animate the object.
 	[Header("Animation Smoothing")]
 	[Range(0, 1f)]
 	public float HorizontalAnimSmoothTime = 0.2f;
@@ -57,6 +59,7 @@ public class RigidMovementController : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
+		// Parameters that will be used throughout the project.
 		anim = this.GetComponent<Animator>(); // Get the animator
 		rigidb = this.GetComponent<Rigidbody>(); // Get the rigidbody
 
@@ -75,6 +78,7 @@ public class RigidMovementController : MonoBehaviour
 
 	void FixedUpdate()
     {
+		// Get inputs, move player do animations and jumping every fixed time.
 		RegisterInputs();
 		MovePlayer();
 		ApplyMoveAnimation();
@@ -96,7 +100,8 @@ public class RigidMovementController : MonoBehaviour
 		);
 	}
 
-	// Rotates player to camera -- is this used?
+	// Rotates player to camera
+	// Used originally by JammoCharacter Asset; left here as it may come in handy later.
 	public void RotateToCamera(Transform t)
 	{
 
