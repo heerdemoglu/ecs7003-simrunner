@@ -1,61 +1,313 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using UnityEngine.UI;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed;//create a public variable of type float
-    //private int count;
-    //private int numPickUps = 3;
-    //public Text scoreText;
-    //public Text winText;
-    //public Text playerPosition;
+    // speed
+    [Range(1f, 4f)]
+    public float acceleration = 2.0f;
+    // rotation speed
+    [Range(1f, 4f)]
+    public float rotationSpeed = 1.0f;
+    //gravity
+    public float Gravity = Physics.gravity.y;
+    // jump speed
+    [Range(1f, 4f)]
+    public float jumpForce = 10.0f;
+    public bool isJumping = true;
+    public bool isGrounded = false;
 
+    // private fields for referencing other objects
+    Animator animator;
+    // Vector3 currentEulerAngles;
+    // Quaternion currentRotation;
+
+    // private variables to track velocity values - sent to animator
+    float velocityX = 0.0f;
+    float velocityZ = 0.0f;
+    float velocityY = 0.0f;
+
+    // preformance boost - searching by int is faster than by String
+    int VelocityZHash;
+    int VelocityXHash;
+    int VelocityYHash;
+    int isJumpingHash;
+    int isJumpAnticipPlayingHash;
+
+    float currentMaxVelocity = 0.5f;
+    float maximumWalkVelocity = 0.5f;
+    float maximumRunVelocity = 2.0f;
+    // float maxJumpVelocity = 0.5f;
+    float clampingThreshold = 0.05f;
+    bool forwardPressed, rightPressed, leftPressed, runPressed, jumpPressed = false;
+    // bool isJumpAnticipPlaying = false;
+
+    private CharacterController controller;
+    private Vector3 moveDirection;
+    private Vector3 verticalDirection;
+
+    // Start is called before the first frame update
     void Start()
     {
-        //count = 0;
-        //winText.text = " ";
-        //SetCountText();
+        animator = GetComponent<Animator>();
+        controller = GetComponent<CharacterController>();
+        moveDirection = Vector3.zero;
 
+        // set speeds
+        maximumRunVelocity = acceleration;
+        maximumWalkVelocity = maximumRunVelocity/4f;
+        currentMaxVelocity = maximumWalkVelocity;
+
+        // set hashes
+        VelocityZHash = Animator.StringToHash("Velocity Z");
+        VelocityXHash = Animator.StringToHash("Velocity X");
+        VelocityYHash = Animator.StringToHash("Velocity Y");
+        isJumpingHash = Animator.StringToHash("isJumping");
+        // isJumpAnticipPlayingHash = Animator.StringToHash("isJumpAnticipPlaying");
     }
 
-    void FixedUpdate()//method for operation involves physics
+    // Update is called once per frame
+    void Update()
     {
-        float horAxis = Input.GetAxis("Horizontal");//takes input from arrow keys and captures them using GetAxis()
-        float verAxis = Input.GetAxis("Vertical");
-        Vector3 movement = new Vector3(horAxis, 0.0f, verAxis);//forms a vector in the direction the ball should move
-        GetComponent<Rigidbody>().AddForce(movement * speed * Time.fixedDeltaTime);//calculates force to be applied to the player
-        //SetplayerPositionText();
+        RegisterUserInputs();
+        currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
+
+        // forward movement
+        RecalculateVelocityZ();
+        MovePlayer();
+        
+        // update facing direction
+        RecalculateVelocityX();
+        RotatePlayer();
+        
+        // jumping
+        JumpPlayer();
+
+        // apply movement
+        moveDirection = transform.TransformDirection(moveDirection);
+        verticalDirection.y = velocityY;
+        controller.Move((moveDirection+verticalDirection) * Time.deltaTime);
+                
+        // assign values to animator parameters
+        animator.SetFloat(VelocityXHash, velocityX);
+        animator.SetFloat(VelocityZHash, velocityZ);
+        animator.SetFloat(VelocityYHash, transform.position.y);
     }
 
-    //called when other game object’s collider, configured as a trigger, collides with the collider of the game object that has this script as a component
+    // get input from user and set local variables - true if pressed
+    void RegisterUserInputs()
+    {
+        forwardPressed = Input.GetKey(KeyCode.W);
+        rightPressed = Input.GetKey(KeyCode.A);
+        leftPressed = Input.GetKey(KeyCode.D);
+        runPressed = Input.GetKey(KeyCode.LeftShift);
+        jumpPressed = Input.GetKey(KeyCode.Space);
+    }
 
-    //void OnTriggerEnter(Collider other)
-    //{
-    //    //if player collides with a game object with the tag PickUp,it sets the game object to inactive
-    //    if (other.gameObject.tag == "PickUp")
-    //    {
-    //        other.gameObject.SetActive(false);
-    //        count++;
-    //        SetCountText();
-    //    }
-    //}
-    //private void SetplayerPositionText()
-    //{
-    //    playerPosition.text = "Position: x= " + transform.position.x.ToString("0.00") + " z= " + transform.position.z.ToString("0.00");
+    //set new x position
+    void RecalculateVelocityX()
+    {
+        // left accelerate
+        if(leftPressed && velocityX > -currentMaxVelocity )
+        {
+            velocityX -= Time.deltaTime * acceleration;
+        }
+        // clamp left to max
+        if(leftPressed && runPressed && velocityX < -currentMaxVelocity)
+        {
+            velocityX = -currentMaxVelocity;
+        }
+        // right accelerate
+        if(rightPressed && velocityX < currentMaxVelocity)
+        {
+            velocityX += Time.deltaTime * acceleration;
+        }
+        // clamp left to max
+        if(rightPressed && runPressed && velocityX > currentMaxVelocity)
+        {
+            velocityX = currentMaxVelocity;
+        }
+        // decelerate
+        // note the difference!
+        if(!leftPressed && !rightPressed)
+        {
+            // deceleration from left (turning back from left)
+            if(velocityX < 0.0f)
+            {
+                velocityX += Time.deltaTime * acceleration;
+            }
+            // deceleration from right (turning back from right)
+            if(velocityX > 0.0f)
+            {
+                velocityX -= Time.deltaTime * acceleration;
+            }
+            // clamp to min
+            if(velocityX != 0.0f && (velocityX > -clampingThreshold && velocityX < clampingThreshold))
+            {
+                velocityX = 0.0f;
+            }
+        }
+    }
 
-    //}
+    // // set new forward position
+    void RecalculateVelocityZ()
+    {
+        // if forward key pressed, increase velocity in z direction
+        if(forwardPressed && velocityZ < currentMaxVelocity)
+        {
+            velocityZ += Time.deltaTime * acceleration;
+        }
+        // clamp to min
+        if(!forwardPressed && velocityZ < 0.0f)
+        {
+            velocityZ = 0.0f;
+        }
+        // clamp forward to max
+        if(forwardPressed && runPressed && velocityZ > currentMaxVelocity)
+        {
+            velocityZ = currentMaxVelocity;
+        }
 
-    //private void SetCountText()
-    //{
-    //    scoreText.text = "Score: " + count.ToString();
-    //    if (count >= numPickUps)
-    //    {
-    //        winText.text = "You Win";
-    //    }
+        // deceleration from forward
+        if(!forwardPressed && velocityZ > 0.0f)
+        {
+            velocityZ -= Time.deltaTime * acceleration;
+        }
+        // decelerate
+        else if(forwardPressed && velocityZ > currentMaxVelocity)
+        {
+            velocityZ -= Time.deltaTime * acceleration;
+            // round to max if we are close
+            if(velocityZ > currentMaxVelocity && velocityZ < (currentMaxVelocity + clampingThreshold)){
+                velocityZ = currentMaxVelocity;
+            }
+        }
+        // round to max if we are close to max
+        else if(forwardPressed && velocityZ < currentMaxVelocity 
+        && velocityZ > (currentMaxVelocity - clampingThreshold))
+        {
+            velocityZ = currentMaxVelocity;
+        }
+    }
 
-    //}
+    // set vertical position
+    void RecalculateYPosition()
+    {
+        // velocityY = rigidb.position.y;
+    }
 
+    // move
+    void MovePlayer()
+    {
+        moveDirection = new Vector3(0, 0, velocityZ * acceleration);
+    }
+
+    // Rotate player to face look direction
+    void RotatePlayer()
+    {
+        transform.Rotate(0, -velocityX * rotationSpeed, 0);
+    }
+
+    // // // Player jumps
+    void JumpPlayer()
+    {   
+        // JUMP make player jump or fall
+        if(controller.isGrounded) 
+        {
+            //there is always a small force pulling character to the ground
+            velocityY = Gravity * Time.deltaTime;
+
+            if(jumpPressed) {
+                velocityY = 5f;
+                animator.SetBool(isJumpingHash, true);
+            }
+        }
+        else
+        {
+            velocityY += Gravity * Time.deltaTime;
+
+            if(velocityY < 0f){
+                // falling
+            }
+            else if(velocityY >0f){
+                animator.SetBool(isJumpingHash, true);
+            }
+        }
+
+        animator.SetBool(isJumpingHash, true);
+        // animator.SetBool(isJumpAnticipPlayingHash, false);
+    }
+
+    // // track if the player is Grounded
+    // bool RaycastToGround()
+    // {
+    //     // float DistanceToTheGround = GetComponent<Collider>().bounds.extents.y;
+    //     return Physics.Raycast(raycastReference.position, Vector3.down, 0.5f);
+    // }
+
+
+    // ARCHIVE
+    // Rotate player to face look direction
+    // void RotatePlayer()
+    // {
+    //     float rotAmount = rotationSpeed * velocityX * Time.deltaTime;
+    //     currentEulerAngles -= new Vector3(0, rotAmount, 0);
+    //     currentRotation.eulerAngles = currentEulerAngles;
+    //     transform.rotation = currentRotation;
+    // }
+        // //Player moves
+    // void MovePlayer()
+    // {
+    //      rigidb.MovePosition(
+    //             transform.position 
+    //             + transform.forward * velocityZ 
+    //             * acceleration * 1.5f * Time.deltaTime
+    //         );
+    // }
+
+
+            // MOVE and ROTATE
+        // RecalculateXPosition();
+        // if(velocityX != 0.0f) 
+        //     RotatePlayer();
+        // RecalculateZPosition();
+        
+        // apply movements
+        // Vector3 move = new Vector3(velocityX, velocityY, velocityZ);
+        // if(velocityZ != 0.0f)
+        //     controller.Move(move * Time.deltaTime * acceleration);
+
+        // if (move != Vector3.zero)
+        //     transform.forward = move;
+
+        // // set gravity
+        // _velocity.y += Gravity * Time.deltaTime;
+        // controller.Move(_velocity * Time.deltaTime);
+
+
+
+        // RegisterUserInputs();
+        // currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
+        
+        // isGrounded = RaycastToGround();
+
+        // // MOVE & ROTATE calculate current velocities
+        // RecalculateXPosition();
+        // if(velocityX != 0.0f) RotatePlayer();
+        // RecalculateZPosition();
+        // if(velocityZ != 0.0f) MovePlayer();
+
+        // // JUMP make player jump
+        // // NEW approach
+        // if (isGrounded && jumpPressed && !isJumping && !isJumpAnticipPlaying){
+        //     isJumpAnticipPlaying = true;
+        //     animator.SetBool(isJumpAnticipPlayingHash, true);
+        //     // 2. play jumpAnticipation() - trigger it in animator?
+
+        //     //      - have a separate blend tree for jumpAnticipation?
+        //     //      - or blend the existing tree with the antip anim            
+        //     //  3. have an event in that animation that calls the jumpPlayer function here?
+        //     //      - only at this point, this function increases the velocityY
+        // }
 }
