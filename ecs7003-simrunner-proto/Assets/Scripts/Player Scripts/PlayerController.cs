@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/**
+ * Other implementation of player controller, it doesnt use WASD, directly uses Horizontal and Vertical Inputs.
+ * It requires clamping setting fixed speed etc. Not used in the final product.
+ */
 public class PlayerController : MonoBehaviour
 {
     // speed
