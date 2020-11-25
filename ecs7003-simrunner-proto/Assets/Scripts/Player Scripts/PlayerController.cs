@@ -19,19 +19,28 @@ public class PlayerController : MonoBehaviour
     public float Gravity = Physics.gravity.y;
     // jump speed
     [Range(1f, 4f)]
-    public float jumpForce = 10.0f;
-    public bool isJumping = true;
-    public bool isGrounded = false;
+    public float jumpHeight = 5.0f;
+    public GameObject raycastReference;
 
     // private fields for referencing other objects
     Animator animator;
-    // Vector3 currentEulerAngles;
-    // Quaternion currentRotation;
+    CharacterController controller;
+    Vector3 moveDirection;
+    Vector3 verticalDirection;
 
     // private variables to track velocity values - sent to animator
     float velocityX = 0.0f;
     float velocityZ = 0.0f;
     float velocityY = 0.0f;
+    float currentMaxVelocity = 0.5f;
+    float maximumWalkVelocity = 0.5f;
+    float maximumRunVelocity = 2.0f;
+    float clampingThreshold = 0.05f;
+
+    // states
+    bool forwardPressed, rightPressed, leftPressed, runPressed, jumpPressed = false;
+    bool isJumping = true;
+    bool isGrounded = false;
 
     // preformance boost - searching by int is faster than by String
     int VelocityZHash;
@@ -39,19 +48,7 @@ public class PlayerController : MonoBehaviour
     int VelocityYHash;
     int isJumpingHash;
     int isJumpAnticipPlayingHash;
-
-    float currentMaxVelocity = 0.5f;
-    float maximumWalkVelocity = 0.5f;
-    float maximumRunVelocity = 2.0f;
-    // float maxJumpVelocity = 0.5f;
-    float clampingThreshold = 0.05f;
-    bool forwardPressed, rightPressed, leftPressed, runPressed, jumpPressed = false;
     // bool isJumpAnticipPlaying = false;
-
-    private CharacterController controller;
-    private Vector3 moveDirection;
-    private Vector3 verticalDirection;
-    public GameObject raycastReference;
 
     // Start is called before the first frame update
     void Start()
@@ -79,6 +76,11 @@ public class PlayerController : MonoBehaviour
         RegisterUserInputs();
         currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
 
+        // jumping
+        float distanceToGround = GetRaycastDistance();
+        isGrounded = distanceToGround < 0.1f;
+        JumpPlayer();
+
         // forward movement
         RecalculateVelocityZ();
         MovePlayer();
@@ -86,9 +88,6 @@ public class PlayerController : MonoBehaviour
         // update facing direction
         RecalculateVelocityX();
         RotatePlayer();
-        
-        // jumping
-        JumpPlayer();
 
         // apply movement
         moveDirection = transform.TransformDirection(moveDirection);
@@ -98,7 +97,9 @@ public class PlayerController : MonoBehaviour
         // assign values to animator parameters
         animator.SetFloat(VelocityXHash, velocityX);
         animator.SetFloat(VelocityZHash, velocityZ);
-        animator.SetFloat(VelocityYHash, GetRaycastDistance());
+        animator.SetFloat(VelocityYHash, distanceToGround);
+        animator.SetBool(isJumpingHash, !isGrounded);
+        // animator.SetBool(isJumpAnticipPlayingHash, false);
     }
 
     // get input from user and set local variables - true if pressed
@@ -206,7 +207,7 @@ public class PlayerController : MonoBehaviour
     // move
     void MovePlayer()
     {
-        moveDirection = new Vector3(0, 0, velocityZ * 4f);
+        moveDirection = new Vector3(0, 0, velocityZ * 3f);
     }
 
     // Rotate player to face look direction
@@ -219,31 +220,18 @@ public class PlayerController : MonoBehaviour
     void JumpPlayer()
     {   
         // JUMP make player jump or fall
-        if(controller.isGrounded) 
+        if(isGrounded && !jumpPressed)
         {
             //there is always a small force pulling character to the ground
-            // velocityY = Gravity * Time.deltaTime;
-            velocityY = 0f;
-
-            if(jumpPressed) {
-                velocityY = 5f;
-                animator.SetBool(isJumpingHash, true);
-            }
+            velocityY = Gravity * Time.deltaTime;
+        }
+        else if(isGrounded && jumpPressed) {
+            velocityY = jumpHeight;
         }
         else
         {
             velocityY += Gravity * Time.deltaTime;
-
-            if(velocityY < 0f){
-                // falling
-            }
-            else if(velocityY >0f){
-                animator.SetBool(isJumpingHash, true);
-            }
         }
-
-        animator.SetBool(isJumpingHash, true);
-        // animator.SetBool(isJumpAnticipPlayingHash, false);
     }
 
     // // track if the player is Grounded
@@ -261,60 +249,9 @@ public class PlayerController : MonoBehaviour
         {
             return hit.distance;
         }
-        return -1f;
+        return 10f;
     }
 
-
-    // ARCHIVE
-    // Rotate player to face look direction
-    // void RotatePlayer()
-    // {
-    //     float rotAmount = rotationSpeed * velocityX * Time.deltaTime;
-    //     currentEulerAngles -= new Vector3(0, rotAmount, 0);
-    //     currentRotation.eulerAngles = currentEulerAngles;
-    //     transform.rotation = currentRotation;
-    // }
-        // //Player moves
-    // void MovePlayer()
-    // {
-    //      rigidb.MovePosition(
-    //             transform.position 
-    //             + transform.forward * velocityZ 
-    //             * acceleration * 1.5f * Time.deltaTime
-    //         );
-    // }
-
-
-            // MOVE and ROTATE
-        // RecalculateXPosition();
-        // if(velocityX != 0.0f) 
-        //     RotatePlayer();
-        // RecalculateZPosition();
-        
-        // apply movements
-        // Vector3 move = new Vector3(velocityX, velocityY, velocityZ);
-        // if(velocityZ != 0.0f)
-        //     controller.Move(move * Time.deltaTime * acceleration);
-
-        // if (move != Vector3.zero)
-        //     transform.forward = move;
-
-        // // set gravity
-        // _velocity.y += Gravity * Time.deltaTime;
-        // controller.Move(_velocity * Time.deltaTime);
-
-
-
-        // RegisterUserInputs();
-        // currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
-        
-        // isGrounded = RaycastToGround();
-
-        // // MOVE & ROTATE calculate current velocities
-        // RecalculateXPosition();
-        // if(velocityX != 0.0f) RotatePlayer();
-        // RecalculateZPosition();
-        // if(velocityZ != 0.0f) MovePlayer();
 
         // // JUMP make player jump
         // // NEW approach
