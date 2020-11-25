@@ -51,6 +51,7 @@ public class PlayerController : MonoBehaviour
     private CharacterController controller;
     private Vector3 moveDirection;
     private Vector3 verticalDirection;
+    public GameObject raycastReference;
 
     // Start is called before the first frame update
     void Start()
@@ -97,7 +98,7 @@ public class PlayerController : MonoBehaviour
         // assign values to animator parameters
         animator.SetFloat(VelocityXHash, velocityX);
         animator.SetFloat(VelocityZHash, velocityZ);
-        animator.SetFloat(VelocityYHash, transform.position.y);
+        animator.SetFloat(VelocityYHash, GetRaycastDistance());
     }
 
     // get input from user and set local variables - true if pressed
@@ -205,7 +206,7 @@ public class PlayerController : MonoBehaviour
     // move
     void MovePlayer()
     {
-        moveDirection = new Vector3(0, 0, velocityZ * acceleration);
+        moveDirection = new Vector3(0, 0, velocityZ * 4f);
     }
 
     // Rotate player to face look direction
@@ -221,7 +222,8 @@ public class PlayerController : MonoBehaviour
         if(controller.isGrounded) 
         {
             //there is always a small force pulling character to the ground
-            velocityY = Gravity * Time.deltaTime;
+            // velocityY = Gravity * Time.deltaTime;
+            velocityY = 0f;
 
             if(jumpPressed) {
                 velocityY = 5f;
@@ -245,11 +247,22 @@ public class PlayerController : MonoBehaviour
     }
 
     // // track if the player is Grounded
-    // bool RaycastToGround()
-    // {
-    //     // float DistanceToTheGround = GetComponent<Collider>().bounds.extents.y;
-    //     return Physics.Raycast(raycastReference.position, Vector3.down, 0.5f);
-    // }
+    bool RaycastToGround()
+    {
+        // float DistanceToTheGround = GetComponent<Collider>().bounds.extents.y;
+        return Physics.Raycast(raycastReference.transform.position, Vector3.down, 0.1f);
+    }
+
+    float GetRaycastDistance()
+    {
+        RaycastHit hit;
+        Ray downRay = new Ray(raycastReference.transform.position, -Vector3.up);
+        if (Physics.Raycast(downRay, out hit))
+        {
+            return hit.distance;
+        }
+        return -1f;
+    }
 
 
     // ARCHIVE
