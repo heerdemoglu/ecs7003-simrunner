@@ -11,10 +11,10 @@ public class PlayerController : MonoBehaviour
 {
     // speed
     [Range(1f, 4f)]
-    public float acceleration = 2.0f;
+    public float acceleration = 3.0f;
     // rotation speed
-    [Range(1f, 4f)]
-    public float rotationSpeed = 0.1f;
+    [Range(0f, 1f)]
+    public float rotationSpeed = 0.05f;
     //gravity
     public float Gravity = Physics.gravity.y;
 
@@ -30,9 +30,12 @@ public class PlayerController : MonoBehaviour
     float velocityX = 0.0f;
     float velocityZ = 0.0f;
     float velocityY = 0.0f;
+
+    float deceleration;
     float maximumWalkVelocity;
     float maximumRunVelocity;
     float currentMaxVelocity;
+    float rotationVelocity;
     float jumpHeight;
     float clampingThreshold = 0.05f;
 
@@ -61,9 +64,11 @@ public class PlayerController : MonoBehaviour
         moveDirection = Vector3.zero;
 
         // set speeds
+        deceleration = acceleration * 2f;
         maximumRunVelocity = acceleration;
         maximumWalkVelocity = maximumRunVelocity/2f;
         currentMaxVelocity = maximumWalkVelocity;
+        rotationVelocity = maximumWalkVelocity/2f;
         jumpHeight = 2.5f * acceleration;
 
         // set hashes
@@ -122,26 +127,26 @@ public class PlayerController : MonoBehaviour
     void RecalculateVelocityX()
     {
         // left accelerate
-        if(leftPressed && velocityX > -maximumWalkVelocity/2f)
+        if(leftPressed && velocityX > -rotationVelocity)
         {
             velocityX -= Time.deltaTime * acceleration;
         }
         // clamp left to max
-        if(leftPressed && velocityX < -maximumWalkVelocity/2f)
+        if(leftPressed && velocityX < -rotationVelocity)
         {
             // velocityX = -currentMaxVelocity/2f;
-            velocityX += Time.deltaTime * acceleration * 2f;
+            velocityX += Time.deltaTime * deceleration;
         }
         // right accelerate
-        if(rightPressed && velocityX < maximumWalkVelocity/2f)
+        if(rightPressed && velocityX < rotationVelocity)
         {
             velocityX += Time.deltaTime * acceleration;
         }
         // clamp left to max
-        if(rightPressed && velocityX > maximumWalkVelocity/2f)
+        if(rightPressed && velocityX > rotationVelocity)
         {
             // velocityX = currentMaxVelocity/2f;
-            velocityX -= Time.deltaTime * acceleration * 2f;
+            velocityX -= Time.deltaTime * deceleration;
         }
         // decelerate
         // note the difference!
@@ -150,12 +155,12 @@ public class PlayerController : MonoBehaviour
             // deceleration from left (turning back from left)
             if(velocityX < 0.0f)
             {
-                velocityX += Time.deltaTime * acceleration * 2f;
+                velocityX += Time.deltaTime * deceleration;
             }
             // deceleration from right (turning back from right)
             if(velocityX > 0.0f)
             {
-                velocityX -= Time.deltaTime * acceleration * 2f;
+                velocityX -= Time.deltaTime * deceleration;
             }
             // clamp to min
             if(velocityX != 0.0f && (velocityX > -clampingThreshold && velocityX < clampingThreshold))
@@ -187,7 +192,7 @@ public class PlayerController : MonoBehaviour
         // deceleration from forward
         if(!forwardPressed && velocityZ > 0.0f)
         {
-            velocityZ -= Time.deltaTime * 2f * acceleration;
+            velocityZ -= Time.deltaTime * deceleration;
         }
         // decelerate
         else if(forwardPressed && velocityZ > currentMaxVelocity)
