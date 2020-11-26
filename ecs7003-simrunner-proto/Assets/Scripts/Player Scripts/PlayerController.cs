@@ -10,11 +10,8 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     // speed
-    [Range(1f, 4f)]
-    public float acceleration = 3.0f;
-    // rotation speed
-    [Range(0f, 1f)]
-    public float rotationSpeed = 0.05f;
+    [Range(2f, 4f)]
+    public float acceleration = 4.0f;
     //gravity
     public float Gravity = Physics.gravity.y;
 
@@ -41,6 +38,7 @@ public class PlayerController : MonoBehaviour
 
     // states
     bool forwardPressed, 
+    backwardPressed,
     rightPressed, 
     leftPressed, 
     runPressed, 
@@ -68,8 +66,9 @@ public class PlayerController : MonoBehaviour
         maximumRunVelocity = acceleration;
         maximumWalkVelocity = maximumRunVelocity/2f;
         currentMaxVelocity = maximumWalkVelocity;
-        rotationVelocity = maximumWalkVelocity/2f;
-        jumpHeight = 2.5f * acceleration;
+        // rotationVelocity = maximumWalkVelocity/2f;
+        rotationVelocity = 1f;
+        jumpHeight = 5f;
 
         // set hashes
         VelocityZHash = Animator.StringToHash("Velocity Z");
@@ -117,6 +116,7 @@ public class PlayerController : MonoBehaviour
     void RegisterUserInputs()
     {
         forwardPressed = Input.GetKey(KeyCode.W);
+        backwardPressed = Input.GetKey(KeyCode.S);
         rightPressed = Input.GetKey(KeyCode.A);
         leftPressed = Input.GetKey(KeyCode.D);
         runPressed = Input.GetKey(KeyCode.LeftShift);
@@ -173,42 +173,59 @@ public class PlayerController : MonoBehaviour
     // // set new forward position
     void RecalculateVelocityZ()
     {
+        // early exit if nothing is pressed and standing still
+        if(!backwardPressed && !forwardPressed && velocityZ == 0.0f)
+            return;
+
+        // // add this if you want to prevent inAir acceleration/deceleration
+        // if(!isGrounded)
+        //     return;
+
         // if forward key pressed, increase velocity in z direction
         if(forwardPressed && velocityZ < currentMaxVelocity)
-        {
             velocityZ += Time.deltaTime * acceleration;
-        }
-        // clamp to min
-        if(!forwardPressed && velocityZ < 0.0f)
-        {
-            velocityZ = 0.0f;
-        }
-        // clamp forward to max
-        if(forwardPressed && runPressed && velocityZ > currentMaxVelocity)
-        {
-            velocityZ = currentMaxVelocity;
-        }
 
         // deceleration from forward
         if(!forwardPressed && velocityZ > 0.0f)
-        {
             velocityZ -= Time.deltaTime * deceleration;
-        }
-        // decelerate
-        else if(forwardPressed && velocityZ > currentMaxVelocity)
+
+        // decelerate from a higher speed than what's allowed
+        if(forwardPressed && velocityZ > currentMaxVelocity)
         {
             velocityZ -= Time.deltaTime * acceleration;
-            // round to max if we are close
-            if(velocityZ > currentMaxVelocity && velocityZ < (currentMaxVelocity + clampingThreshold)){
+            // round to max (from above) if we are close to threshold
+            if(velocityZ < (currentMaxVelocity + clampingThreshold))
                 velocityZ = currentMaxVelocity;
+
+        }
+        
+        // clamp forward to max (when running)
+        if(forwardPressed && runPressed && velocityZ > currentMaxVelocity)
+            velocityZ = currentMaxVelocity;
+
+        // round to max if we are close to max
+        if(forwardPressed && velocityZ < currentMaxVelocity 
+        && velocityZ > (currentMaxVelocity - clampingThreshold))
+            velocityZ = currentMaxVelocity;
+
+        // walk backwards
+        if(backwardPressed && velocityZ <= 0.0f)
+        {
+            if(velocityZ > -maximumWalkVelocity)
+            {
+                velocityZ -= Time.deltaTime * acceleration;
+            }
+            if(velocityZ <= -maximumWalkVelocity) 
+            {
+                velocityZ = -maximumWalkVelocity;
             }
         }
-        // round to max if we are close to max
-        else if(forwardPressed && velocityZ < currentMaxVelocity 
-        && velocityZ > (currentMaxVelocity - clampingThreshold))
+        // decelerate from walk backwards
+        if(!backwardPressed && velocityZ < 0.0f)
         {
-            velocityZ = currentMaxVelocity;
+            velocityZ += Time.deltaTime * deceleration;
         }
+
     }
 
     // set vertical position
@@ -226,7 +243,7 @@ public class PlayerController : MonoBehaviour
     // Rotate player to face look direction
     void RotatePlayer()
     {
-        transform.Rotate(0, -velocityX * rotationSpeed, 0);
+        transform.Rotate(0, -velocityX, 0);
     }
 
     // // // Player jumps
@@ -240,6 +257,7 @@ public class PlayerController : MonoBehaviour
         }
         else if(isGrounded && jumpPressed) {
             velocityY = jumpHeight;
+            // velocityY = Mathf.Lerp(0, jumpHeight, Time.deltaTime);
         }
         else
         {
