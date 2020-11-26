@@ -14,7 +14,7 @@ public class PlayerController : MonoBehaviour
     public float acceleration = 2.0f;
     // rotation speed
     [Range(1f, 4f)]
-    public float rotationSpeed = 1.0f;
+    public float rotationSpeed = 0.3f;
     //gravity
     public float Gravity = Physics.gravity.y;
     // jump speed
