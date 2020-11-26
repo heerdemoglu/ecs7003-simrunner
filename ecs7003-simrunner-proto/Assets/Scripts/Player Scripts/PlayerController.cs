@@ -38,8 +38,12 @@ public class PlayerController : MonoBehaviour
     float clampingThreshold = 0.05f;
 
     // states
-    bool forwardPressed, rightPressed, leftPressed, runPressed, jumpPressed = false;
-    bool isJumping = true;
+    bool forwardPressed, 
+    rightPressed, 
+    leftPressed, 
+    runPressed, 
+    jumpPressed = false;
+    // bool isJumping = true;
     bool isGrounded = false;
 
     // preformance boost - searching by int is faster than by String
@@ -76,9 +80,11 @@ public class PlayerController : MonoBehaviour
         RegisterUserInputs();
         currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
 
-        // jumping
+        // determine vertical position
         float distanceToGround = GetRaycastDistance();
         isGrounded = distanceToGround < 0.1f;
+        
+        // jumping
         JumpPlayer();
 
         // forward movement
