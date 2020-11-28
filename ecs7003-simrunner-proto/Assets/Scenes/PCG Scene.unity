@@ -177,7 +177,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &729165213
 Transform:
   m_ObjectHideFlags: 0
@@ -473,11 +473,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BoundaryTile: {fileID: 970220522678230769, guid: e33fd4f2aebe3a740995c0042bdc155d, type: 3}
+  tiles:
+  - {fileID: 733230821265055940, guid: 3c178e80fbdadaa48a30f9a1ba1d3ab8, type: 3}
   fwdSpawn: 0
   tileLen: 50
   playerTransform: {fileID: 3069237268000533404}
   noOfAliveBounds: 5
+  noOfTilesPerBound: 12
   spawnOffset: 30
+  spawnTileValues: {x: 12, y: 18, z: 30}
 --- !u!4 &971184706
 Transform:
   m_ObjectHideFlags: 0
@@ -1633,9 +1637,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acceleration: 2
-  rotationSpeed: 0.3
   Gravity: -9.81
-  jumpHeight: 5
   raycastReference: {fileID: 1527738080}
 --- !u!143 &2437520127562854696
 CharacterController:
