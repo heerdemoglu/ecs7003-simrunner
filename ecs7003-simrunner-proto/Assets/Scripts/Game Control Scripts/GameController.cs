@@ -6,9 +6,12 @@ using UnityEngine.UI;
 public class GameController : MonoBehaviour
 {
     public Text timerText;
+    public Text gameOverText;
     private float startTime;
     private bool stopTimer = false;
     private float endTime;
+    bool isGameOver=false;
+    public GameObject playButton;
     // Start is called before the first frame update
     void Start()
     {
@@ -17,13 +20,17 @@ public class GameController : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {   if (stopTimer)
+    {
+       /* if (Input.GetKey(KeyCode.P) && isGameOver)
+        {
+
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }*/
+        if (stopTimer)
         {
             return;
         }
         float timer = Time.time - startTime;//in seconds
-        
-
         int minutes = (int)timer / 60; //amount of minutes
         int seconds = (int)timer % 60;//remainder seconds from minutes
         int fraction = (int)(timer * 100) % 100;
@@ -32,10 +39,11 @@ public class GameController : MonoBehaviour
     }
     public void StopTime()
     {
+        playButton.SetActive(true);
         endTime = Time.time-startTime;
         stopTimer = true;
         timerText.color = Color.red;
-        
+        gameOverText.text="GAME OVER !!";
         Debug.Log(endTime);
 
     }
