@@ -21,11 +21,24 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       /* if (Input.GetKey(KeyCode.P) && isGameOver)
+       if (isGameOver)
+       {
+            gameOverText.text = "GAME OVER !!";
+            playButton.SetActive(true);
+        }
+       if (Input.GetKeyDown(KeyCode.P) && !isGameOver)
         {
+            if (Time.timeScale == 0)
+            {
+                Time.timeScale = 1;
+            }
+            else
+            {
+                Time.timeScale = 0;
+            }
 
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }*/
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
         if (stopTimer)
         {
             return;
@@ -39,12 +52,10 @@ public class GameController : MonoBehaviour
     }
     public void StopTime()
     {
-        playButton.SetActive(true);
         endTime = Time.time-startTime;
         stopTimer = true;
         timerText.color = Color.red;
-        gameOverText.text="GAME OVER !!";
-        Debug.Log(endTime);
+       // Debug.Log(endTime);
 
     }
 }
