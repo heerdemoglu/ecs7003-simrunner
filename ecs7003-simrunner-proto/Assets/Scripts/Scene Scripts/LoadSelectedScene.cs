@@ -10,6 +10,10 @@ public class LoadSelectedScene : MonoBehaviour
     {
         SceneManager.LoadScene(index);
     }
+    public void ReloadScene()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
     // Update is called once per frame
 
 }

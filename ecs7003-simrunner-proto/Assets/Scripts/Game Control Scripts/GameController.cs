@@ -7,11 +7,15 @@ public class GameController : MonoBehaviour
 {
     public Text timerText;
     public Text gameOverText;
+
     private float startTime;
     private bool stopTimer = false;
     private float endTime;
+
     bool isGameOver=false;
-    public GameObject playButton;
+
+    public GameObject gameOverOptions;
+    public GameObject pausePanel;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,18 +27,21 @@ public class GameController : MonoBehaviour
     {
        if (isGameOver)
        {
-            gameOverText.text = "GAME OVER !!";
-            playButton.SetActive(true);
+            //gameOverText.text = "You have died\n Stimulation has ended\nWould you like to begin stimulation again?";
+            gameOverOptions.SetActive(true);
        }
        if (Input.GetKeyDown(KeyCode.P) && !isGameOver)
         {
             if (Time.timeScale == 0)
             {
                 Time.timeScale = 1;
+                pausePanel.SetActive(false);
             }
             else
             {
                 Time.timeScale = 0;
+                pausePanel.SetActive(true);
+
             }
 
             //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);

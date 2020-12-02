@@ -16,6 +16,7 @@ public class FadeToScene : MonoBehaviour
     }
     IEnumerator FadeOut()
     {
+        Debug.Log("fadeout started");
         Fade fade = camera.GetComponent<Fade>();
         float fadeTime = fade.FadeOut();
         yield return new WaitForSeconds(fadeTime);
