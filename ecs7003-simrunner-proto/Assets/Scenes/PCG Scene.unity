@@ -474,14 +474,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BoundaryTile: {fileID: 970220522678230769, guid: e33fd4f2aebe3a740995c0042bdc155d, type: 3}
   tiles:
-  - {fileID: 733230821265055940, guid: 3c178e80fbdadaa48a30f9a1ba1d3ab8, type: 3}
+  - {fileID: 3077869682962799183, guid: 101f5c4cc99ef0d47a1a7b16c8fc8397, type: 3}
+  - {fileID: 2408421616794285799, guid: e37699438303ce14e9246e5cba8cb200, type: 3}
+  - {fileID: 3694453895486014301, guid: 8dcaa43a4752fa14da5e5506bacd8393, type: 3}
+  - {fileID: 731883402044973083, guid: c5a3d8b67d9a71a438bfb77bcd157411, type: 3}
+  - {fileID: 2386262695245359331, guid: f34fef83c9dc0aa45abd594fbb10bc6c, type: 3}
   fwdSpawn: 0
   tileLen: 50
   playerTransform: {fileID: 3069237268000533404}
   noOfAliveBounds: 5
-  noOfTilesPerBound: 12
+  noOfTilesPerBound: 18
   spawnOffset: 30
-  spawnTileValues: {x: 12, y: 18, z: 30}
+  spawnTileValues: {x: 12, y: 18, z: 45}
+  rotationValues: {x: 0, y: 5, z: 20}
+  movingTiles: 6
+  rotatingTiles: 6
+  randomMovementValues: {x: 0, y: 0, z: 0}
+  randomRotationValues: {x: 0, y: 0, z: 0}
+  tileMovementSpeed: 0
+  tileRotationSpeed: 0
 --- !u!4 &971184706
 Transform:
   m_ObjectHideFlags: 0
