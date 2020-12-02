@@ -22,7 +22,7 @@ public class TileManager : MonoBehaviour
     public int movingTiles;
     public int rotatingTiles;
 
-    public Vector3 randomMovementValues;
+    //public Vector3 randomMovementValues;
     public Vector3 randomRotationValues;
     public float tileMovementSpeed;
     public float tileRotationSpeed;
@@ -33,6 +33,8 @@ public class TileManager : MonoBehaviour
     private int directionX = 1;
     private int directionY = 1;
     private int directionZ = 1;
+    private float rotY = 1f;
+    private float rotZ = 1f;
 
     /**
      * Starts the game with a single game boundary. The rest is built as player moves.
@@ -117,25 +119,33 @@ public class TileManager : MonoBehaviour
      */
     private void UpdateTilePositionRotation()
     {
-        /* Pick random tiles to rotate from list of tiles:
-        for(int i = 0; i < rotatingTiles; i++)
-        {
-            int idx = Random.Range(0, aliveTiles.Count);
-            Quaternion to = Quaternion.Euler(0, 0, 0);
-
-
-            if (to == aliveTiles[idx].transform.rotation)
-            {
-                to = Quaternion.Euler(Random.Range(-randomRotationValues.x, randomRotationValues.x), Random.Range(-randomRotationValues.y, randomRotationValues.y),
-                Random.Range(-randomRotationValues.z, randomRotationValues.z));
-            }
-            
-            aliveTiles[idx].transform.rotation = Quaternion.Slerp(aliveTiles[idx].transform.rotation, to, tileRotationSpeed * Time.deltaTime);
-        }*/
-
-        // Pick random tiles to move:
-        // Pick random tiles to rotate from list of tiles:
         for (int i = 0; i < tilesToMove.Length; i++)
+        {
+
+            if (aliveTiles[tilesToMove[i]].transform.rotation.eulerAngles.y > randomRotationValues.y)
+            {
+                rotY = -1f;
+            }
+            else if (aliveTiles[tilesToMove[i]].transform.rotation.eulerAngles.y < randomRotationValues.y)
+            {
+                rotY = 1f;
+            }
+
+            if (aliveTiles[tilesToMove[i]].transform.rotation.eulerAngles.z > randomRotationValues.z)
+            {
+                rotZ = -1f;
+            }
+            else if (aliveTiles[tilesToMove[i]].transform.rotation.eulerAngles.z < randomRotationValues.z)
+            {
+                rotZ = 1f;
+            }
+
+            Vector3 rotation = new Vector3(0, rotY * tileRotationSpeed * Time.deltaTime, rotZ * tileRotationSpeed * Time.deltaTime);
+            aliveTiles[tilesToMove[i]].transform.Rotate(rotation);
+        }
+ 
+            // tile movement:
+            for (int i = 0; i < tilesToMove.Length; i++)
         {
 
             if (aliveTiles[tilesToMove[i]].transform.position.x > 15)
@@ -156,13 +166,14 @@ public class TileManager : MonoBehaviour
                 directionY = 1;
             }
 
-            if (aliveTiles[tilesToMove[i]].transform.position.z > aliveTiles[tilesToMove[i]].transform.position.z-10)
+            // Dont play in Z due to platform construction for now:s
+            if (aliveTiles[tilesToMove[i]].transform.position.z > 10)
             {
-                directionZ = -1;
+                directionZ = 0;
             }
-            else if (aliveTiles[tilesToMove[i]].transform.position.z < aliveTiles[tilesToMove[i]].transform.position.z + 10)
+            else if (aliveTiles[tilesToMove[i]].transform.position.z < -10)
             {
-                directionZ = 1;
+                directionZ = 0;
             }
 
             Vector3 movement = Vector3.right * directionX * tileMovementSpeed * Time.deltaTime +

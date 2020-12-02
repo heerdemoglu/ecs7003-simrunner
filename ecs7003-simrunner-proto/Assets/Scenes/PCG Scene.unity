@@ -486,13 +486,13 @@ MonoBehaviour:
   noOfTilesPerBound: 20
   spawnOffset: 30
   spawnTileValues: {x: 12, y: 18, z: 45}
-  rotationValues: {x: 0, y: 5, z: 20}
+  rotationValues: {x: 10, y: 5, z: 0}
   movingTiles: 35
   rotatingTiles: 35
   randomMovementValues: {x: 0, y: 0, z: 0}
-  randomRotationValues: {x: 0, y: 0, z: 0}
+  randomRotationValues: {x: 0, y: 5, z: 5}
   tileMovementSpeed: 0.5
-  tileRotationSpeed: 0
+  tileRotationSpeed: 5
 --- !u!4 &971184706
 Transform:
   m_ObjectHideFlags: 0
