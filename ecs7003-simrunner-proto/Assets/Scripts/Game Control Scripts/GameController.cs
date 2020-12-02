@@ -25,7 +25,7 @@ public class GameController : MonoBehaviour
        {
             gameOverText.text = "GAME OVER !!";
             playButton.SetActive(true);
-        }
+       }
        if (Input.GetKeyDown(KeyCode.P) && !isGameOver)
         {
             if (Time.timeScale == 0)
@@ -55,6 +55,7 @@ public class GameController : MonoBehaviour
         endTime = Time.time-startTime;
         stopTimer = true;
         timerText.color = Color.red;
+        isGameOver = true;
        // Debug.Log(endTime);
 
     }

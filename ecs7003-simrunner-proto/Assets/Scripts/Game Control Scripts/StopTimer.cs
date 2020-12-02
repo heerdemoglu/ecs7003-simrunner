@@ -11,16 +11,16 @@ public class StopTimer : MonoBehaviour
     private void Start()
     {
         GameObject gameC = GameObject.FindGameObjectWithTag("GameController");
-        gameController = gameC.GetComponent<GameController>();
+        gameController = gameC.GetComponent<GameController>();//gets the script component
     }
-     void Update()
+    /* void Update()
     {
         if (gameOver.text == "YOU DIED")
         {
             gameController.StopTime();
             return;
         }
-    }
+    }*/
     void OnTriggerEnter(Collider other)
     {
         gameController.StopTime();
