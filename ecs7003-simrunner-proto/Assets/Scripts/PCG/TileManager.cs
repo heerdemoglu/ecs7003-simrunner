@@ -29,7 +29,10 @@ public class TileManager : MonoBehaviour
 
     private List<GameObject> aliveBounds = new List<GameObject>();
     private List<GameObject> aliveTiles = new List<GameObject>();
-
+    private int[] tilesToMove;
+    private int directionX = 1;
+    private int directionY = 1;
+    private int directionZ = 1;
 
     /**
      * Starts the game with a single game boundary. The rest is built as player moves.
@@ -41,6 +44,12 @@ public class TileManager : MonoBehaviour
         {
             SpawnGameBoundary();
             SpawnTiles();
+
+            tilesToMove = new int[movingTiles];
+            for (int arrayIndex = 0; arrayIndex < tilesToMove.Length; arrayIndex++)
+            {
+                tilesToMove[arrayIndex] = Random.Range(0, aliveTiles.Count);
+            }
         }
     }
 
@@ -58,7 +67,7 @@ public class TileManager : MonoBehaviour
             DestroyTiles();
         }
 
-        //UpdateTilePositionRotation();
+        UpdateTilePositionRotation();
 
     }
 
@@ -108,7 +117,7 @@ public class TileManager : MonoBehaviour
      */
     private void UpdateTilePositionRotation()
     {
-        // Pick random tiles to rotate from list of tiles:
+        /* Pick random tiles to rotate from list of tiles:
         for(int i = 0; i < rotatingTiles; i++)
         {
             int idx = Random.Range(0, aliveTiles.Count);
@@ -122,23 +131,44 @@ public class TileManager : MonoBehaviour
             }
             
             aliveTiles[idx].transform.rotation = Quaternion.Slerp(aliveTiles[idx].transform.rotation, to, tileRotationSpeed * Time.deltaTime);
-        }
+        }*/
 
         // Pick random tiles to move:
         // Pick random tiles to rotate from list of tiles:
-        for (int i = 0; i < movingTiles; i++)
+        for (int i = 0; i < tilesToMove.Length; i++)
         {
-            int idx = Random.Range(0, aliveTiles.Count);
-            Vector3 to = new Vector3(0, 0, 0);
 
-
-            if (aliveTiles[idx].transform.position + to == aliveTiles[idx].transform.position)
+            if (aliveTiles[tilesToMove[i]].transform.position.x > 15)
             {
-                to = new Vector3(Random.Range(-randomMovementValues.x, randomMovementValues.x), Random.Range(-randomMovementValues.y, randomMovementValues.y),
-                Random.Range(-randomMovementValues.z, randomMovementValues.z));
+                directionX = -1;
+            }
+            else if (aliveTiles[tilesToMove[i]].transform.position.x < -15)
+            {
+                directionX = 1;
             }
 
-            aliveTiles[idx].transform.position = Vector3.Slerp(aliveTiles[idx].transform.position, aliveTiles[idx].transform.position+to, tileMovementSpeed * Time.deltaTime);
+            if (aliveTiles[tilesToMove[i]].transform.position.y > 15)
+            {
+                directionY = -1;
+            }
+            else if (aliveTiles[tilesToMove[i]].transform.position.y < -15)
+            {
+                directionY = 1;
+            }
+
+            if (aliveTiles[tilesToMove[i]].transform.position.z > aliveTiles[tilesToMove[i]].transform.position.z-10)
+            {
+                directionZ = -1;
+            }
+            else if (aliveTiles[tilesToMove[i]].transform.position.z < aliveTiles[tilesToMove[i]].transform.position.z + 10)
+            {
+                directionZ = 1;
+            }
+
+            Vector3 movement = Vector3.right * directionX * tileMovementSpeed * Time.deltaTime +
+                Vector3.up * directionY * tileMovementSpeed * Time.deltaTime +
+                Vector3.forward * directionZ * tileMovementSpeed * Time.deltaTime;
+            aliveTiles[tilesToMove[i]].transform.Translate(movement);
         }
 
     }

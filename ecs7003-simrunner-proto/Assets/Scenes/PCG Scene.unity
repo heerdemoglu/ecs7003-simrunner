@@ -483,15 +483,15 @@ MonoBehaviour:
   tileLen: 50
   playerTransform: {fileID: 3069237268000533404}
   noOfAliveBounds: 5
-  noOfTilesPerBound: 18
+  noOfTilesPerBound: 20
   spawnOffset: 30
   spawnTileValues: {x: 12, y: 18, z: 45}
   rotationValues: {x: 0, y: 5, z: 20}
-  movingTiles: 6
-  rotatingTiles: 6
+  movingTiles: 35
+  rotatingTiles: 35
   randomMovementValues: {x: 0, y: 0, z: 0}
   randomRotationValues: {x: 0, y: 0, z: 0}
-  tileMovementSpeed: 0
+  tileMovementSpeed: 0.5
   tileRotationSpeed: 0
 --- !u!4 &971184706
 Transform:
