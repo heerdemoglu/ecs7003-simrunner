@@ -37,12 +37,15 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       if (isGameOver)
+        if (Input.GetKey("escape"))
+        {
+            Application.Quit();
+        }
+        if (isGameOver)
        {
-            //gameOverText.text = "You have died\n Stimulation has ended\nWould you like to begin stimulation again?";
             gameOverOptions.SetActive(true);
        }
-       if (Input.GetKeyDown(KeyCode.P) && !isGameOver)
+        if (Input.GetKeyDown(KeyCode.P) && !isGameOver)//dislay pause menu
         {
             if (Time.timeScale == 0)
             {
@@ -53,12 +56,9 @@ public class GameController : MonoBehaviour
             {
                 Time.timeScale = 0;
                 pausePanel.SetActive(true);
-
             }
-
-            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
-        if (stopTimer )
+        if (stopTimer)
         {
             return;
         }
@@ -70,6 +70,12 @@ public class GameController : MonoBehaviour
         
     }
     
+    public void leaveGame()
+    {
+        StopTime();
+        Time.timeScale = 1;
+    }
+
     IEnumerator startTimer() {
         yield return new WaitUntil(() => GUI.color.a == 0);
         stopTimer = false;
@@ -80,8 +86,8 @@ public class GameController : MonoBehaviour
         endTime = Time.time-startTime;
         stopTimer = true;
         timerText.color = Color.red;
-        isGameOver = true;
-       // Debug.Log(endTime);
+        if(Time.timeScale !=0)
+            isGameOver = true;
 
     }
 }
