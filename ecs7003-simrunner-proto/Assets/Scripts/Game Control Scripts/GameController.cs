@@ -8,21 +8,26 @@ public class GameController : MonoBehaviour
     public Text timerText;
     public Text gameOverText;
 
+    //timer
     private float startTime;
-    private bool stopTimer = true;
+    private bool stopTimer = false;
     private float endTime;
 
-    bool isGameOver=false;
+    //game booleans
+    private bool isGameOver = false;
+    private bool gameBegun = false;
 
+    //displays
     public GameObject gameOverOptions;
     public GameObject pausePanel;
-    // Start is called before the first frame update
-    void Start()
-    {
 
-        //startTime = Time.time;
-        StartCoroutine("startTimer");
-    }
+    // Start is called before the first frame update
+    //void Start()
+    //{
+
+    //    //startTime = Time.time;
+    //    StartCoroutine("startTimer");
+    //}
     //IEnumerator fadeIn()
     //{
     //    GameObject cam = GameObject.FindGameObjectWithTag("MainCamera");
@@ -58,7 +63,7 @@ public class GameController : MonoBehaviour
                 pausePanel.SetActive(true);
             }
         }
-        if (stopTimer)
+        if (stopTimer || !gameBegun)
         {
             return;
         }
@@ -76,17 +81,25 @@ public class GameController : MonoBehaviour
         Time.timeScale = 1;
     }
 
-    IEnumerator startTimer() {
-        yield return new WaitUntil(() => GUI.color.a == 0);
-        stopTimer = false;
+    public void startGame()
+    {
+        gameBegun = true;
         startTime = Time.time;
+        //zone.beginChase();
+
     }
+
+    //IEnumerator startTimer() {
+    //    yield return new WaitUntil(() => GUI.color.a == 0);
+    //    stopTimer = false;
+    //    startTime = Time.time;
+    //}
     public void StopTime()
     {
         endTime = Time.time-startTime;
         stopTimer = true;
         timerText.color = Color.red;
-        if(Time.timeScale !=0)
+        if(Time.timeScale != 0)
             isGameOver = true;
 
     }
