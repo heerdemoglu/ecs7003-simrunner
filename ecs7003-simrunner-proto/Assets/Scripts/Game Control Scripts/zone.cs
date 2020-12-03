@@ -15,13 +15,6 @@ public class Zone : MonoBehaviour
         {
             transform.position = transform.position + (Vector3.forward * speed * Time.deltaTime);
         }
-        //RayCastHit rHit;
-        ////if (Physics.Raycast(transform.position, transform.Transform.TransformDirection(vector3.forward), out rHit);
-        ////send out ray cast from current position and determines the distance to the rHit()
-        //if (Physics.Raycast(transform.position, vector3.forward, out rHit))
-        //{
-        //    DistanceToPlayer = rHit.distance;
-        //}
     }
 
     public void beginChase()
