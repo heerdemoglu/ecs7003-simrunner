@@ -17,17 +17,16 @@ public class GameController : MonoBehaviour
     private bool isGameOver = false;
     private bool gameBegun = false;
 
+    private Zone zone;
     //displays
     public GameObject gameOverOptions;
     public GameObject pausePanel;
 
-    // Start is called before the first frame update
-    //void Start()
-    //{
-
-    //    //startTime = Time.time;
-    //    StartCoroutine("startTimer");
-    //}
+    void Start()
+    {
+        GameObject chasingZone = GameObject.FindGameObjectWithTag("Zone");
+        zone = chasingZone.GetComponent<Zone>();
+    }
     //IEnumerator fadeIn()
     //{
     //    GameObject cam = GameObject.FindGameObjectWithTag("MainCamera");
@@ -40,6 +39,7 @@ public class GameController : MonoBehaviour
     //}
 
     // Update is called once per frame
+
     void Update()
     {
         if (Input.GetKey("escape"))
@@ -85,7 +85,7 @@ public class GameController : MonoBehaviour
     {
         gameBegun = true;
         startTime = Time.time;
-        //zone.beginChase();
+        zone.beginChase();
 
     }
 
