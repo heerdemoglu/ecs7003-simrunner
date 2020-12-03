@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 /**
  * Other implementation of player controller, it doesnt use WASD, directly uses Horizontal and Vertical Inputs.
@@ -16,12 +16,17 @@ public class PlayerController : MonoBehaviour
     public float Gravity = Physics.gravity.y;
 
     public GameObject raycastReference;
+    public Text distanceText;
+    public Text velocityText;
+    public Text neVelText;
 
     // private fields for referencing other objects
     Animator animator;
     CharacterController controller;
-    Vector3 moveDirection;
-    Vector3 verticalDirection;
+    Vector3 horizontalMove;
+    Vector3 verticalMove;
+    Vector3 slippingMove = Vector3.zero;
+    Vector3 combinedMovement = Vector3.zero;
 
     // private variables to track velocity values - sent to animator
     float velocityX = 0.0f;
@@ -45,6 +50,8 @@ public class PlayerController : MonoBehaviour
     jumpPressed = false;
     // bool isJumping = true;
     bool isGrounded = false;
+    public bool isWallrunning = false;
+    public bool isOnSlope = false;
 
     // preformance boost - searching by int is faster than by String
     int VelocityZHash;
@@ -52,21 +59,23 @@ public class PlayerController : MonoBehaviour
     int VelocityYHash;
     int isJumpingHash;
     int isJumpAnticipPlayingHash;
-    // bool isJumpAnticipPlaying = false;
+    
+    float groundSlopeAngle = 0f;
+    float sideFriction = 0.1f;
+    float distanceToGround = 0f;
 
     // Start is called before the first frame update
     void Start()
     {
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
-        moveDirection = Vector3.zero;
+        horizontalMove = Vector3.zero;
 
         // set speeds
         deceleration = acceleration * 2f;
         maximumRunVelocity = acceleration;
         maximumWalkVelocity = maximumRunVelocity/2f;
         currentMaxVelocity = maximumWalkVelocity;
-        // rotationVelocity = maximumWalkVelocity/2f;
         rotationVelocity = 1f;
         jumpHeight = 5f;
 
@@ -75,41 +84,50 @@ public class PlayerController : MonoBehaviour
         VelocityXHash = Animator.StringToHash("Velocity X");
         VelocityYHash = Animator.StringToHash("Velocity Y");
         isJumpingHash = Animator.StringToHash("isJumping");
-        // isJumpAnticipPlayingHash = Animator.StringToHash("isJumpAnticipPlaying");
     }
 
     // Update is called once per frame
     void Update()
-    {
+    {   
         RegisterUserInputs();
         currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
+        
 
+        // Reset combined movement vector
+        combinedMovement = Vector3.zero;
         // determine vertical position
-        float distanceToGround = GetRaycastDistance();
-        isGrounded = distanceToGround < 0.1f;
+        RaycastHit rayCastHit = RaycastDownwards();
+        isGrounded = distanceToGround < 0.15f;
         
-        // jumping
-        JumpPlayer();
-
-        // forward movement
-        RecalculateVelocityZ();
+        // horizontal movements
         MovePlayer();
-        
-        // update facing direction
-        RecalculateVelocityX();
-        RotatePlayer();
 
-        // apply movement
-        moveDirection = transform.TransformDirection(moveDirection);
-        verticalDirection.y = velocityY;
-        controller.Move((moveDirection+verticalDirection) * Time.deltaTime);
-                
+        // jumping and gravity
+        JumpAndGravity();
+
+        isOnSlope = groundSlopeAngle < controller.slopeLimit && groundSlopeAngle >= 1f;
+        isWallrunning = groundSlopeAngle >= controller.slopeLimit;
+        if(isOnSlope) 
+            OnSlopeMovements(rayCastHit.normal);
+        else if (isWallrunning)
+        {
+            // wall run script?
+            slippingMove = Vector3.zero;
+            //
+        }
+        else 
+            slippingMove = Vector3.zero;
+
+
+        // apply the combined movement vector
+        controller.Move(combinedMovement * Time.deltaTime);
+
+
+
+        // displaying text on UI
+        DisplayUI();
         // assign values to animator parameters
-        animator.SetFloat(VelocityXHash, velocityX);
-        animator.SetFloat(VelocityZHash, velocityZ);
-        animator.SetFloat(VelocityYHash, distanceToGround);
-        animator.SetBool(isJumpingHash, !isGrounded);
-        // animator.SetBool(isJumpAnticipPlayingHash, false);
+        AssignAnimatorParameters();
     }
 
     // get input from user and set local variables - true if pressed
@@ -123,7 +141,7 @@ public class PlayerController : MonoBehaviour
         jumpPressed = Input.GetKey(KeyCode.Space);
     }
 
-    //set new x position
+    // set new x position
     void RecalculateVelocityX()
     {
         // left accelerate
@@ -170,7 +188,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // // set new forward position
+    // set new forward position
     void RecalculateVelocityZ()
     {
         // early exit if nothing is pressed and standing still
@@ -228,32 +246,15 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    // set vertical position
-    void RecalculateYPosition()
-    {
-        // velocityY = rigidb.position.y;
-    }
-
-    // move
-    void MovePlayer()
-    {
-        moveDirection = new Vector3(0, 0, velocityZ * 3f);
-    }
-
-    // Rotate player to face look direction
-    void RotatePlayer()
-    {
-        transform.Rotate(0, -velocityX, 0);
-    }
-
-    // // // Player jumps
-    void JumpPlayer()
+    // Player jumps/falls/slipping off a slope
+    void RecalculateVelocityY()
     {   
         // JUMP make player jump or fall
         if(isGrounded && !jumpPressed)
         {
             //there is always a small force pulling character to the ground
-            velocityY = Gravity * Time.deltaTime;
+            // velocityY = Gravity * Time.deltaTime;
+            velocityY = 0f;
         }
         else if(isGrounded && jumpPressed) {
             velocityY = jumpHeight;
@@ -265,35 +266,78 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // // track if the player is Grounded
-    bool RaycastToGround()
+    // horizontal movement calculations
+    void MovePlayer()
     {
-        // float DistanceToTheGround = GetComponent<Collider>().bounds.extents.y;
-        return Physics.Raycast(raycastReference.transform.position, Vector3.down, 0.1f);
+        RecalculateVelocityZ();
+        horizontalMove = new Vector3(0, 0, velocityZ * 3f);
+
+        RecalculateVelocityX();
+        transform.Rotate(0, -velocityX, 0);
+        
+        horizontalMove = transform.TransformDirection(horizontalMove);
+        combinedMovement += horizontalMove;
     }
 
-    float GetRaycastDistance()
+    // Jump and gravity, vertical movement calcualtions
+    void JumpAndGravity()
     {
-        RaycastHit hit;
-        Ray downRay = new Ray(raycastReference.transform.position, -Vector3.up);
-        if (Physics.Raycast(downRay, out hit))
+        RecalculateVelocityY();
+        verticalMove.y = velocityY;
+        combinedMovement += verticalMove;
+    }
+
+    //
+    void OnSlopeMovements(Vector3 normal)
+    {
+        // check if there is a slipping downwards force
+        if(distanceToGround < 0.3f)
         {
-            return hit.distance;
+            slippingMove.x += (1f - normal.y) * normal.x * (1f - sideFriction);
+            slippingMove.z += (1f - normal.y) * normal.z * (1f - sideFriction);
+            combinedMovement += slippingMove * Time.deltaTime * 30f;
         }
-        return 10f;
+        // clearing the slipping movement
+        else if (groundSlopeAngle < 10f || groundSlopeAngle > -10f)
+        {
+            slippingMove = Vector3.zero;
+        }
     }
 
+    //
+    RaycastHit RaycastDownwards()
+    {
+        RaycastHit rayCastHit;
+        Vector3 p1 = transform.position + controller.center;
 
-        // // JUMP make player jump
-        // // NEW approach
-        // if (isGrounded && jumpPressed && !isJumping && !isJumpAnticipPlaying){
-        //     isJumpAnticipPlaying = true;
-        //     animator.SetBool(isJumpAnticipPlayingHash, true);
-        //     // 2. play jumpAnticipation() - trigger it in animator?
+        if(Physics.SphereCast(
+            p1 + new Vector3(0,0.1f,0), 
+            controller.height/2 , 
+            Vector3.down, 
+            out rayCastHit, 
+            10)
+        ){
+            groundSlopeAngle = Vector3.Angle(rayCastHit.normal, Vector3.up);
+            distanceToGround = rayCastHit.distance;
+        }
 
-        //     //      - have a separate blend tree for jumpAnticipation?
-        //     //      - or blend the existing tree with the antip anim            
-        //     //  3. have an event in that animation that calls the jumpPlayer function here?
-        //     //      - only at this point, this function increases the velocityY
-        // }
+        return rayCastHit;
+    }
+
+    //
+    void DisplayUI()
+    {
+        distanceText.text = distanceToGround.ToString();;
+        velocityText.text = velocityY.ToString();
+        neVelText.text = groundSlopeAngle.ToString();
+    }
+
+    // 
+    void AssignAnimatorParameters()
+    {
+        animator.SetFloat(VelocityXHash, -velocityX);
+        animator.SetFloat(VelocityZHash, velocityZ);
+        animator.SetFloat(VelocityYHash, distanceToGround);
+        animator.SetBool(isJumpingHash, !isGrounded);
+    }
 }
