@@ -15,6 +15,7 @@ TagManager:
   - Win
   - TimerController
   - Bot
+  - Canvas
   layers:
   - Default
   - TransparentFX

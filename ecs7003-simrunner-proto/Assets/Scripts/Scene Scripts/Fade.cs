@@ -5,8 +5,8 @@ using UnityEngine;
 public class Fade : MonoBehaviour
 {
     // Start is called before the first frame update
-    public float fadeTime = 2f;
-    public Texture2D fadeTexure;
+    public float fadeTime = 1.5f;
+    public Texture2D fadeTexture;
     private int textureDepth = -1000;
 
     private float start, end, time;
@@ -16,6 +16,7 @@ public class Fade : MonoBehaviour
 
     private void OnGUI()
     {
+        //Debug.Log("onGUI");
         time += Time.deltaTime;
         float alpha = Mathf.Lerp(start, end, time / fadeTime);//gives fraction between start and end
         GUI.color = new Color(GUI.color.r, GUI.color.g, GUI.color.b, alpha);
@@ -23,7 +24,7 @@ public class Fade : MonoBehaviour
         GUI.depth = textureDepth;
         Rect dimension = new Rect(0, 0, Screen.width, Screen.height);
 
-        GUI.DrawTexture(dimension, fadeTexure);
+        GUI.DrawTexture(dimension, fadeTexture);
 
     }
 
@@ -42,6 +43,6 @@ public class Fade : MonoBehaviour
     }
     public float FadeIn()
     {
-        return StartFade(TRANSPARENT, OPAQUE);
+        return StartFade( OPAQUE, TRANSPARENT);
     }
 }

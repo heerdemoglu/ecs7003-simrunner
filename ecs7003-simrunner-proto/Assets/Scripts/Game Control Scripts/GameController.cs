@@ -9,7 +9,7 @@ public class GameController : MonoBehaviour
     public Text gameOverText;
 
     private float startTime;
-    private bool stopTimer = false;
+    private bool stopTimer = true;
     private float endTime;
 
     bool isGameOver=false;
@@ -19,8 +19,20 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        startTime = Time.time;
+
+        //startTime = Time.time;
+        StartCoroutine("startTimer");
     }
+    //IEnumerator fadeIn()
+    //{
+    //    GameObject cam = GameObject.FindGameObjectWithTag("MainCamera");
+    //    Fade fade = cam.GetComponent<Fade>();
+    //    //float fadeTime = fade.FadeIn();
+    //    yield return new WaitForSeconds(fade.fadeTime);
+    //    stopTimer = false;
+    //    startTime = Time.time;
+
+    //}
 
     // Update is called once per frame
     void Update()
@@ -46,7 +58,7 @@ public class GameController : MonoBehaviour
 
             //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
-        if (stopTimer)
+        if (stopTimer )
         {
             return;
         }
@@ -56,6 +68,12 @@ public class GameController : MonoBehaviour
         int fraction = (int)(timer * 100) % 100;
         timerText.text = string.Format("{0:00} : {1:00} : {2:00}", minutes, seconds, fraction);
         
+    }
+    
+    IEnumerator startTimer() {
+        yield return new WaitUntil(() => GUI.color.a == 0);
+        stopTimer = false;
+        startTime = Time.time;
     }
     public void StopTime()
     {
