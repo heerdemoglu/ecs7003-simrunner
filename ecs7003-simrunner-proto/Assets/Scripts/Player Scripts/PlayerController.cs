@@ -4,8 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /**
- * Other implementation of player controller, it doesnt use WASD, directly uses Horizontal and Vertical Inputs.
- * It requires clamping setting fixed speed etc. Not used in the final product.
+ * Other implementation of player controller
  */
 public class PlayerController : MonoBehaviour
 {
@@ -15,6 +14,9 @@ public class PlayerController : MonoBehaviour
     //gravity
     public float Gravity = Physics.gravity.y;
 
+    public bool isWallrunning = false;
+    public bool isOnSlope = false;
+    
     public GameObject raycastReference;
     public Text distanceText;
     public Text velocityText;
@@ -23,8 +25,11 @@ public class PlayerController : MonoBehaviour
     // private fields for referencing other objects
     Animator animator;
     CharacterController controller;
-    Vector3 horizontalMove;
-    Vector3 verticalMove;
+    // WallRunning wallRunningObject;
+
+    // Vectors
+    Vector3 horizontalMove = Vector3.zero;
+    Vector3 verticalMove = Vector3.zero;
     Vector3 slippingMove = Vector3.zero;
     Vector3 combinedMovement = Vector3.zero;
 
@@ -47,11 +52,11 @@ public class PlayerController : MonoBehaviour
     rightPressed, 
     leftPressed, 
     runPressed, 
-    jumpPressed = false;
-    // bool isJumping = true;
-    bool isGrounded = false;
-    public bool isWallrunning = false;
-    public bool isOnSlope = false;
+    jumpPressed,
+    isGrounded,
+    wallRunRight,
+    hasCollided,
+    wallRunLeft = false;
 
     // preformance boost - searching by int is faster than by String
     int VelocityZHash;
@@ -64,12 +69,24 @@ public class PlayerController : MonoBehaviour
     float sideFriction = 0.1f;
     float distanceToGround = 0f;
 
+
+    float distance;
+    int platLayer;
+    RaycastHit rayHit;
+    public GameObject myMesh;
+
     // Start is called before the first frame update
     void Start()
     {
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
-        horizontalMove = Vector3.zero;
+
+        distance = controller.radius + 0.2f;
+        //First add a Layer name to all platforms (I used MovingPlatform)
+        //Now this script won't run on regular objects, only platforms.
+        platLayer = LayerMask.NameToLayer("Ground");
+        
+        // wallRunningObject = (WallRunning)gameObject.GetComponent(typeof(WallRunning));
 
         // set speeds
         deceleration = acceleration * 2f;
@@ -91,43 +108,84 @@ public class PlayerController : MonoBehaviour
     {   
         RegisterUserInputs();
         currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
-        
 
         // Reset combined movement vector
         combinedMovement = Vector3.zero;
-        // determine vertical position
-        RaycastHit rayCastHit = RaycastDownwards();
-        isGrounded = distanceToGround < 0.15f;
-        
-        // horizontal movements
-        MovePlayer();
 
-        // jumping and gravity
-        JumpAndGravity();
-
-        isOnSlope = groundSlopeAngle < controller.slopeLimit && groundSlopeAngle >= 1f;
-        isWallrunning = groundSlopeAngle >= controller.slopeLimit;
-        if(isOnSlope) 
-            OnSlopeMovements(rayCastHit.normal);
-        else if (isWallrunning)
+        // not wallrunning
+        if(!hasCollided)
         {
-            // wall run script?
-            slippingMove = Vector3.zero;
-            //
+            if(!TestThisShit())
+            {
+                // determine vertical position
+                RaycastHit rayCastHit = RaycastDownwards();
+                isGrounded = distanceToGround < 0.15f;
+                // horizontal movements
+                MovePlayer();
+                // jumping and gravity
+                JumpAndGravity();
+                // apply the combined movement vector
+                controller.Move(combinedMovement * Time.deltaTime);
+            }
         }
-        else 
-            slippingMove = Vector3.zero;
+        // wallrunning
+        else
+        {
+            GameObject wallThatWasHit = rayHit.transform.gameObject;
+            Vector3 wallSurfaceVector = wallThatWasHit.transform.forward;
+            // Debug.Log(wallThatWasHit.transform.forward);
+            // Debug.DrawRay(rayHit.transform.position, wallThatWasHit.transform.forward, Color.green);
 
+            RecalculateVelocityZ();
+            RecalculateVelocityX();
+            controller.Move(wallSurfaceVector * velocityZ * 2f * Time.deltaTime);
+            transform.Rotate(0, -velocityX, 0);
+            velocityY = 0f;
+            distanceToGround = 0f;
+            transform.rotation = Quaternion.LookRotation(wallSurfaceVector);
+            myMesh.transform.rotation = Quaternion.FromToRotation(Vector3.up, rayHit.normal);
+            transform.position 
+                = new Vector3(transform.position.x-0.45f, transform.position.y, transform.position.z);
+            // Debug.Log(myMesh.transform.rotation);
+            // float smooth = 5.0f;
+            // Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(wallSurfaceVector),  Time.deltaTime * smooth);
+            // myMesh.transform.rotation.z = 90f;
 
-        // apply the combined movement vector
-        controller.Move(combinedMovement * Time.deltaTime);
-
-
+            if(jumpPressed)
+            {
+                hasCollided = false;
+            }
+        }
 
         // displaying text on UI
         DisplayUI();
         // assign values to animator parameters
         AssignAnimatorParameters();
+    }
+
+    // get the hit here if any 
+    bool TestThisShit(){
+        RaycastHit hit;
+ 
+        //Bottom of controller. Slightly above ground so it doesn't bump into slanted platforms. (Adjust to your needs)
+        Vector3 p1 = transform.position + Vector3.up * 0.25f;
+        //Top of controller
+        Vector3 p2 = p1 + Vector3.up * controller.height;
+ 
+        //Check around the character in a 360, 10 times (increase if more accuracy is needed)
+        for(int i=0; i<360; i+= 36){
+            //Check if anything with the platform layer touches this object
+            if (Physics.CapsuleCast(p1, p2, 0, new Vector3(Mathf.Cos(i), 0, Mathf.Sin(i)), out hit, distance, 1<<platLayer)){
+                //If the object is touched by a platform, move the object away from it
+                controller.Move(hit.normal*(distance-hit.distance));
+                hasCollided = true;
+                Debug.Log("wallrunning activated");
+                rayHit = hit;
+                return true;
+            }
+        }
+        rayHit = new RaycastHit();
+        return false;
     }
 
     // get input from user and set local variables - true if pressed
@@ -314,6 +372,26 @@ public class PlayerController : MonoBehaviour
             p1 + new Vector3(0,0.1f,0), 
             controller.height/2 , 
             Vector3.down, 
+            out rayCastHit, 
+            10)
+        ){
+            groundSlopeAngle = Vector3.Angle(rayCastHit.normal, Vector3.up);
+            distanceToGround = rayCastHit.distance;
+        }
+
+        return rayCastHit;
+    }
+
+    //
+    RaycastHit RaycastLeft()
+    {
+        RaycastHit rayCastHit;
+        Vector3 p1 = transform.position + controller.center;
+
+        if(Physics.SphereCast(
+            p1 + new Vector3(0,0.1f,0), 
+            controller.height/2 , 
+            Vector3.left,
             out rayCastHit, 
             10)
         ){

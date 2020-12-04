@@ -16,8 +16,9 @@ public class WallRunning : MonoBehaviour
     // For use in animations; not perfected yet, hence commented out for the prototype.
     // The animation does not support rotation and as player rotates the movement actions may not work as intended.
     // Using model meshes cause unwanted rigidbody interactions.
-    public Transform body;
+    // public Transform body;
     Vector3 rot;
+    CharacterController controller;
 
     // Used by wall checking - Determine which wall I connect at.
     private float distanceFromLeft;
@@ -33,7 +34,8 @@ public class WallRunning : MonoBehaviour
     // Used to start WallRunning instance
     private void Awake()
     {
-        rot = GetComponent<Rigidbody>().transform.eulerAngles;
+        // rot = GetComponent<Rigidbody>().transform.eulerAngles;
+        controller = GetComponent<CharacterController>();
     }
 
     private void checkWall()
@@ -51,22 +53,27 @@ public class WallRunning : MonoBehaviour
         {
             // check distance set the corresponding boolean wall parameter
             distanceFromLeft = Vector3.Distance(transform.position, leftW.point);
-            if (distanceFromLeft < 5f)
+            if (distanceFromLeft < 1f)
             {
-                onLeftWall = true;
-                onRightWall = false;
-                
+                RunOnLeftWall();        
+            }
+            else
+            {
+                EndRunOnLeftWall();
             }
         }
 
-        // Same for the right. If connects the wall from both sides; breaks tie with the right.
-        if (Physics.Raycast(rayRight, out rightW, raycastLimit))
+        // Else same for the right. If connects the wall from both sides; breaks tie with the left.
+        else if (Physics.Raycast(rayRight, out rightW, raycastLimit))
         {
             distanceFromRight = Vector3.Distance(transform.position, rightW.point);
-            if (distanceFromRight < 5f)
+            if (distanceFromRight < 1f)
             {
-                onLeftWall = false;
-                onRightWall = true;
+                RunOnRightWall();
+            }
+            else
+            {
+                EndRunOnRightWall();
             }
         }
 
@@ -79,59 +86,99 @@ public class WallRunning : MonoBehaviour
         checkWall();
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void RunOnLeftWall()
     {
-
-        // If connected with a tile or a special tile set wall running to true.
-        if (collision.transform.CompareTag("Tiles") 
-            || collision.transform.CompareTag("Speed Up Wall") 
-            || collision.transform.CompareTag("Slow Down Wall")
-            || collision.transform.CompareTag("Wall Break") 
-            || collision.transform.CompareTag("Double Jump Wall"))
-        {
-            isWallRunning = true;
-        }
+        onLeftWall = true;
+        onRightWall = false;
     }
 
-    private void OnCollisionStay(Collision collision)
+    private void EndRunOnLeftWall()
     {
-        // could also do with isWallRunning = true; this is too verbose.
-        if(collision.transform.CompareTag("Tiles") 
-            || collision.transform.CompareTag("Speed Up Wall") 
-            || collision.transform.CompareTag("Slow Down Wall")
-            || collision.transform.CompareTag("Wall Break") 
-            || collision.transform.CompareTag("Double Jump Wall"))
-        {
+        onLeftWall = false;
+    }
+    
+    private void RunOnRightWall()
+    {
+        onLeftWall = false;
+        onRightWall = true;
+    }
 
-            // ROTATIONS ARE DISABLED FOR NOW, at specific scenarios they are broken, otherwise working.
-            //transform.rotation = Quaternion.FromToRotation(GetComponent<Rigidbody>().transform.eulerAngles, collision.contacts[0].normal);
+    private void EndRunOnRightWall()
+    {
+        onRightWall = false;
+    }  
+
+    public bool isOnLeftWall(){
+        return this.onLeftWall;
+    }  
+  
+    public bool isOnRightWall(){
+        return this.onRightWall;
+    }  
+    
+    // private void OnCollisionEnter(Collision collision)
+    // {
+
+    //     // If connected with a tile or a special tile set wall running to true.
+    //     if (collision.transform.CompareTag("Tiles") 
+    //         || collision.transform.CompareTag("Speed Up Wall") 
+    //         || collision.transform.CompareTag("Slow Down Wall")
+    //         || collision.transform.CompareTag("Wall Break") 
+    //         || collision.transform.CompareTag("Double Jump Wall"))
+    //     {
+    //         isWallRunning = true;
+    //     }
+    // }
+
+    // private void OnCollisionStay(Collision collision)
+    // {
+    //     // could also do with isWallRunning = true; this is too verbose.
+    //     if(collision.transform.CompareTag("Tiles") 
+    //         || collision.transform.CompareTag("Speed Up Wall") 
+    //         || collision.transform.CompareTag("Slow Down Wall")
+    //         || collision.transform.CompareTag("Wall Break") 
+    //         || collision.transform.CompareTag("Double Jump Wall"))
+    //     {
+
+    //         // ROTATIONS ARE DISABLED FOR NOW, at specific scenarios they are broken, otherwise working.
+    //         //transform.rotation = Quaternion.FromToRotation(GetComponent<Rigidbody>().transform.eulerAngles, collision.contacts[0].normal);
             
-            // According to the wall; apply some force that moves you forward and sticks you to the surface (gravity still effects you)
-            if (onLeftWall) {
-                GetComponent<Rigidbody>().AddForce(Vector3.up * upForce, ForceMode.Impulse);
-                GetComponent<Rigidbody>().AddForce(transform.right * rightForce, ForceMode.Impulse);
-            }
+    //         // According to the wall; apply some force that moves you forward and sticks you to the surface (gravity still effects you)
+    //         if (onLeftWall) {
+    //             RunOnLeftWall();
+    //         }
 
-            if (onRightWall)
-            {
-                GetComponent<Rigidbody>().AddForce(Vector3.up * upForce, ForceMode.Impulse);
-                GetComponent<Rigidbody>().AddForce(-transform.right * rightForce, ForceMode.Impulse);
-            }
-        }
-    }
+    //         if (onRightWall)
+    //         {
+    //             RunOnRightWall();
+    //         }
+    //     }
+    // }
 
-    private void OnCollisionExit(Collision collision)
-    {
-        // if you exit wall return back to original running condition
-        if (collision.transform.CompareTag("Tiles") 
-            && collision.transform.CompareTag("Speed Up Wall") 
-            && collision.transform.CompareTag("Slow Down Wall")
-            && collision.transform.CompareTag("Wall Break") 
-            && collision.transform.CompareTag("Double Jump Wall"))
-        { 
-            isWallRunning = false;
-            // Rotation animation disabled again due to the reason told above.
-            //transform.rotation = Quaternion.FromToRotation(GetComponent<Rigidbody>().transform.eulerAngles, rot);
-        } 
-    }
+    // private void OnCollisionExit(Collision collision)
+    // {
+    //     // if you exit wall return back to original running condition
+    //     if (collision.transform.CompareTag("Tiles") 
+    //         && collision.transform.CompareTag("Speed Up Wall") 
+    //         && collision.transform.CompareTag("Slow Down Wall")
+    //         && collision.transform.CompareTag("Wall Break") 
+    //         && collision.transform.CompareTag("Double Jump Wall"))
+    //     { 
+    //         isWallRunning = false;
+    //         // Rotation animation disabled again due to the reason told above.
+    //         //transform.rotation = Quaternion.FromToRotation(GetComponent<Rigidbody>().transform.eulerAngles, rot);
+    //     } 
+    // }
+
+    // private void RunOnLeftWall()
+    // {
+    //     GetComponent<Rigidbody>().AddForce(Vector3.up * upForce, ForceMode.Impulse);
+    //     GetComponent<Rigidbody>().AddForce(transform.right * rightForce, ForceMode.Impulse);
+    // }
+    
+    // private void RunOnRightWall()
+    // {
+    //     GetComponent<Rigidbody>().AddForce(Vector3.up * upForce, ForceMode.Impulse);
+    //     GetComponent<Rigidbody>().AddForce(-transform.right * rightForce, ForceMode.Impulse);
+    // }
 }
