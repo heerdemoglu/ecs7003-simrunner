@@ -23,6 +23,6 @@ public class StopTimer : MonoBehaviour
     }*/
     void OnTriggerEnter(Collider other)
     {
-        gameController.StopTime();
+        gameController.gameOver();
     }
 }

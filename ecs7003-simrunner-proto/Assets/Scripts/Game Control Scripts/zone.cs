@@ -21,5 +21,10 @@ public class Zone : MonoBehaviour
     {
         chasing = true;
     }
+
+    public void pauseChase()
+    {
+        chasing = false;
+    }
 }   
 

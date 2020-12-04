@@ -89,18 +89,18 @@ public class GameController : MonoBehaviour
 
     }
 
-    //IEnumerator startTimer() {
-    //    yield return new WaitUntil(() => GUI.color.a == 0);
-    //    stopTimer = false;
-    //    startTime = Time.time;
-    //}
+    public void gameOver()
+    {
+        isGameOver = true;
+        StopTime();
+    }
     public void StopTime()
     {
         endTime = Time.time-startTime;
         stopTimer = true;
         timerText.color = Color.red;
-        if(Time.timeScale != 0)
-            isGameOver = true;
+        //if(Time.timeScale != 0)
+        //    isGameOver = true;
 
     }
 }
