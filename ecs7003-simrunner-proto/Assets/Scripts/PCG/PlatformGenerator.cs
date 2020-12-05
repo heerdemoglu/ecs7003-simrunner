@@ -18,8 +18,8 @@ public class PlatformGenerator : MonoBehaviour
 
     void Start()
     {
-        GameObject startPlatform = Instantiate(startTile, transform.forward, transform.rotation);
-        alivePlatforms.Add(startPlatform);
+        //GameObject startPlatform = Instantiate(startTile, transform.forward, transform.rotation);
+       //alivePlatforms.Add(startPlatform);
 
 
         // Start with a game boundary:
