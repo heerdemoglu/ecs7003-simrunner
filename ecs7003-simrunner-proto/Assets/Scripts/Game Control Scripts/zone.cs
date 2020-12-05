@@ -5,15 +5,24 @@ using UnityEngine;
 public class Zone : MonoBehaviour
 {
 
-
+    private GameObject player
     public float speed;
     private bool chasing = false;
+    private float acceleration;
     // Update is called once per frame
+    void Start()
+    {
+
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        
+
+    }
     void Update()
     {
+        acceleration = player.GetComponent<PlayerController>().acceleration;
         if (chasing)
         {
-            transform.position = transform.position + (Vector3.forward * speed * Time.deltaTime);
+            transform.position = transform.position + (Vector3.forward * speed *acceleration* Time.deltaTime);
         }
     }
 
