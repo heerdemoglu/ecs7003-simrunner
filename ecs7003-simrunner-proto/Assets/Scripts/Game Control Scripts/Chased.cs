@@ -61,7 +61,7 @@ public class Chased : MonoBehaviour
             //float intensity = distanceToZone / farTier;
             //float newIntensity = lowestIntensity + (intensity * adjustableIntesity);
             zlight.intensity = Mathf.Lerp(0, highestIntensity, 1f - (distanceToZone / farTier));
-            glight.intensity = Mathf.Lerp(originalIntensity, 0f, zlight.intensity/ highestIntensity);
+            glight.intensity = Mathf.Lerp(originalIntensity, 0f, 1f - (distanceToZone / farTier));
             //glight.intensity = newIntensity;
             if (distanceToZone < deathTier)
             {
