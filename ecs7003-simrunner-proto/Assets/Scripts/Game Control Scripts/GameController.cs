@@ -38,8 +38,6 @@ public class GameController : MonoBehaviour
 
     //}
 
-    // Update is called once per frame
-
     void Update()
     {
         if (Input.GetKey("escape"))
@@ -47,9 +45,12 @@ public class GameController : MonoBehaviour
             Application.Quit();
         }
         if (isGameOver)
-       {
+        {
             gameOverOptions.SetActive(true);
-       }
+            //AudioSource audioData = GetComponent<AudioSource>();
+            //audioData.Play();
+
+        }
         if (Input.GetKeyDown(KeyCode.P) && !isGameOver)//dislay pause menu
         {
             if (Time.timeScale == 0)
@@ -99,8 +100,6 @@ public class GameController : MonoBehaviour
         endTime = Time.time-startTime;
         stopTimer = true;
         timerText.color = Color.red;
-        //if(Time.timeScale != 0)
-        //    isGameOver = true;
 
     }
 }

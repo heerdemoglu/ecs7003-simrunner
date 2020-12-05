@@ -4,47 +4,92 @@ using UnityEngine;
 
 public class Chased : MonoBehaviour
 {
+    public GameObject gameLight;
+    private Light glight;
+    private float originalIntensity;
+    //zone light
+    public GameObject zoneLight;
+    //private Color originalColor;
+    //public Color zoneLightColor;
+    public float highestIntensity = 4f;
+    private float lowestIntensity = 0f;
+
+    private Light zlight;
+
+
     private GameController gameController;
     private GameObject zone;
-    public float distanceToZone;
 
-    private float farTier;
+    public float distanceToZone;
+    private bool inRange;
+
+    //tier ranges
+    private float farTier;//max range of the zone
     private float midTier;
     private float nearTier;
     public float deathTier;
-    public float range;
+    public float tierRange;
+
     // Start is called before the first frame update
     void Start()
-    {   GameObject gameC = GameObject.FindGameObjectWithTag("GameController");
+    {
+
+        zlight = zoneLight.GetComponent<Light>();
+        glight = gameLight.GetComponent<Light>();
+        zlight.intensity = 0f;
+        originalIntensity = glight.intensity;
+
+        GameObject gameC = GameObject.FindGameObjectWithTag("GameController");
         zone = GameObject.FindGameObjectWithTag("Zone");
         gameController = gameC.GetComponent<GameController>();
-        nearTier = deathTier + range;
-        midTier = nearTier + range;
-        farTier = midTier + range;
+
+        nearTier = deathTier + tierRange;
+        midTier = nearTier + tierRange;
+        farTier = midTier + tierRange;
     }
     void Update()
     {
+
         float zoneZ = zone.transform.position.z;
         distanceToZone = Mathf.Abs(transform.position.z - zoneZ);
 
-        if (distanceToZone < deathTier)
+        if (distanceToZone <= farTier)
+        { 
+            inRange = true;
+            
+            //float inZoneDistance = highestIntensity - lowestIntensity;
+            //float intensity = distanceToZone / farTier;
+            //float newIntensity = lowestIntensity + (intensity * adjustableIntesity);
+            zlight.intensity = Mathf.Lerp(0, highestIntensity, 1f - (distanceToZone / farTier));
+            glight.intensity = Mathf.Lerp(originalIntensity, 0f, zlight.intensity/ highestIntensity);
+            //glight.intensity = newIntensity;
+            if (distanceToZone < deathTier)
+            {
+                Debug.Log("made contact");
+                zone.GetComponent<Zone>().pauseChase();
+                gameController.gameOver();
+            }
+            else if (distanceToZone < nearTier)
+            {
+                Debug.Log("Within nearTier");
+            }
+            else if (distanceToZone < midTier)
+            {
+                Debug.Log("Within midTier");
+            }
+            else
+            {
+                Debug.Log("Within farTier");
+            }
+        }
+        else
         {
-            Debug.Log("made contact");
+            inRange = false;
+            zlight.intensity = Mathf.Lerp(zlight.intensity,0f,1); ;
+            glight.intensity = Mathf.Lerp(glight.intensity, originalIntensity, 1);
+            //glight.intensity = 1;
+        }
 
-            gameController.gameOver();
-        }
-        else if (distanceToZone < nearTier)
-        {
-            Debug.Log("Within nearTier");
-        }
-        else if (distanceToZone < midTier)
-        {
-            Debug.Log("Within midTier");
-        }
-        else if (distanceToZone < farTier)
-        {
-            Debug.Log("Within farTier");
-        }
         Debug.DrawLine(transform.position, zone.transform.position, Color.red);
     }
 
