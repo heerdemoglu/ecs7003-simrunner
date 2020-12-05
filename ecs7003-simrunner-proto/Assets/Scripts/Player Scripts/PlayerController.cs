@@ -135,7 +135,7 @@ public class PlayerController : MonoBehaviour
         currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
 
         // Reset combined movement vector
-        combinedMovement = Vector3.zero;
+        combinedMovement = Vector3.zero; // (0,0,0)
 
         // not wallrunning
         if(!hasCollided)
@@ -145,10 +145,10 @@ public class PlayerController : MonoBehaviour
                 // determine vertical position
                 RaycastHit rayCastHit = RaycastDownwards();
                 isGrounded = distanceToGround < 0.15f;
-                // horizontal movements
-                MovePlayer();
+                // horizontal movement - x and z
+                MovePlayer(); // (xDir, 0, zDir)
                 // jumping and gravity
-                JumpAndGravity();
+                JumpAndGravity(); // (xDir, 0, zDir) --> (xDir, YDIR, zDir) ==> (xDir + jumpXProj, jumpYProj , zDir)  ::: Gravity -- (xDir + jumpXProj- gravXProj, jumpYProj - gravYProj , zDir) (IGNORE)
                 // apply the combined movement vector
                 controller.Move(combinedMovement * Time.deltaTime);
             }
