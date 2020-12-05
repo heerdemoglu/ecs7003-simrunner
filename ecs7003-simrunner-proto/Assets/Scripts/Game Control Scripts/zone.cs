@@ -5,7 +5,7 @@ using UnityEngine;
 public class Zone : MonoBehaviour
 {
 
-    private GameObject player
+    private GameObject player;
     public float speed;
     private bool chasing = false;
     private float acceleration;
@@ -13,7 +13,7 @@ public class Zone : MonoBehaviour
     void Start()
     {
 
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        player = GameObject.FindGameObjectWithTag("Player");
         
 
     }
@@ -22,7 +22,7 @@ public class Zone : MonoBehaviour
         acceleration = player.GetComponent<PlayerController>().acceleration;
         if (chasing)
         {
-            transform.position = transform.position + (Vector3.forward * speed *acceleration* Time.deltaTime);
+            transform.position = transform.position + (Vector3.forward * speed * Time.deltaTime);
         }
     }
 
