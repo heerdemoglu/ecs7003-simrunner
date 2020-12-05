@@ -9,12 +9,13 @@ public class Zone : MonoBehaviour
     public float speed;
     private bool chasing = false;
     private float acceleration;
+    public float initialDistance = 15f;
     // Update is called once per frame
     void Start()
     {
 
         player = GameObject.FindGameObjectWithTag("Player");
-        
+        //transform.position.z = player.transform.position.z - initialDistance;
 
     }
     void Update()
