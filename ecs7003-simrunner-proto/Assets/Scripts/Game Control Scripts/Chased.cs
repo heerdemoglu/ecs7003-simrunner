@@ -52,17 +52,13 @@ public class Chased : MonoBehaviour
 
         float zoneZ = zone.transform.position.z;
         distanceToZone = Mathf.Abs(transform.position.z - zoneZ);
-
+        
         if (distanceToZone <= farTier)
         { 
             inRange = true;
-            
-            //float inZoneDistance = highestIntensity - lowestIntensity;
-            //float intensity = distanceToZone / farTier;
-            //float newIntensity = lowestIntensity + (intensity * adjustableIntesity);
             zlight.intensity = Mathf.Lerp(0, highestIntensity, 1f - (distanceToZone / farTier));
             glight.intensity = Mathf.Lerp(originalIntensity, 0f, 1f - (distanceToZone / farTier));
-            //glight.intensity = newIntensity;
+
             if (distanceToZone < deathTier)
             {
                 Debug.Log("made contact");
@@ -87,7 +83,6 @@ public class Chased : MonoBehaviour
             inRange = false;
             zlight.intensity = Mathf.Lerp(zlight.intensity,0f,1); ;
             glight.intensity = Mathf.Lerp(glight.intensity, originalIntensity, 1);
-            //glight.intensity = 1;
         }
 
         Debug.DrawLine(transform.position, zone.transform.position, Color.red);
