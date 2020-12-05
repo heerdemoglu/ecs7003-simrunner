@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 /**
  * Other implementation of player controller, it doesnt use WASD, directly uses Horizontal and Vertical Inputs.
@@ -11,10 +11,21 @@ public class PlayerController : MonoBehaviour
 {
     // speed
     [Range(1f, 4f)]
-    public float acceleration = 2.0f;
+    public float acceleration ;
+
     // rotation speed
     [Range(1f, 4f)]
-    public float rotationSpeed = 0.3f;
+    public float rotationSpeed;
+
+    //settings sliders
+    public Slider accelerationSlider;
+    public float intitialAcceleration = 2f;
+    public Slider rotationSlider;
+    public float intitialRotation = 0.3f;
+
+    public float maxSlider = 4f;
+    public float minSlider = 1f;
+
     //gravity
     public float Gravity = Physics.gravity.y;
     // jump speed
@@ -57,6 +68,17 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //Slider aSlider = accelerationSlider.GetComponent<Slider>();
+        
+        accelerationSlider.maxValue = maxSlider;
+        accelerationSlider.minValue = minSlider;
+        accelerationSlider.value = intitialAcceleration;
+
+        //rotationSpeed = intitialRotation;
+        rotationSlider.maxValue = maxSlider;
+        rotationSlider.minValue = minSlider;
+        rotationSlider.value = intitialRotation;
+
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
         moveDirection = Vector3.zero;
@@ -258,17 +280,25 @@ public class PlayerController : MonoBehaviour
         return 10f;
     }
 
+    public void adjustAcceleration(float sliderAcceleration)
+    {
+        acceleration = sliderAcceleration;
 
-        // // JUMP make player jump
-        // // NEW approach
-        // if (isGrounded && jumpPressed && !isJumping && !isJumpAnticipPlaying){
-        //     isJumpAnticipPlaying = true;
-        //     animator.SetBool(isJumpAnticipPlayingHash, true);
-        //     // 2. play jumpAnticipation() - trigger it in animator?
+    }
+    public void adjustRotation(float sliderRotation)
+    {
+        rotationSpeed = sliderRotation;
+    }
+    // // JUMP make player jump
+    // // NEW approach
+    // if (isGrounded && jumpPressed && !isJumping && !isJumpAnticipPlaying){
+    //     isJumpAnticipPlaying = true;
+    //     animator.SetBool(isJumpAnticipPlayingHash, true);
+    //     // 2. play jumpAnticipation() - trigger it in animator?
 
-        //     //      - have a separate blend tree for jumpAnticipation?
-        //     //      - or blend the existing tree with the antip anim            
-        //     //  3. have an event in that animation that calls the jumpPlayer function here?
-        //     //      - only at this point, this function increases the velocityY
-        // }
+    //     //      - have a separate blend tree for jumpAnticipation?
+    //     //      - or blend the existing tree with the antip anim            
+    //     //  3. have an event in that animation that calls the jumpPlayer function here?
+    //     //      - only at this point, this function increases the velocityY
+    // }
 }

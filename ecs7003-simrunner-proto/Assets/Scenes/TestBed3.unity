@@ -637,7 +637,19 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 836959682}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: adjustRotation
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &178839216
 GameObject:
   m_ObjectHideFlags: 0
@@ -3054,7 +3066,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &835971773
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3166,8 +3178,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab5226c913010a34584c9987e0e13eff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  acceleration: 2
+  acceleration: 0
   rotationSpeed: 3.02
+  accelerationSlider: {fileID: 1000712635}
+  intitialAcceleration: 2
+  rotationSlider: {fileID: 174845246}
+  intitialRotation: 0.3
+  maxSlider: 4
+  minSlider: 1
   Gravity: -9.81
   jumpHeight: 5
   raycastReference: {fileID: 1747899998}
@@ -4090,7 +4108,19 @@ MonoBehaviour:
   m_Value: 0
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 836959682}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: adjustAcceleration
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1024631855
 GameObject:
   m_ObjectHideFlags: 0
@@ -8607,7 +8637,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b20935a25295d946854d800cf1121df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
+  speed: 0
 --- !u!1 &2053254500
 GameObject:
   m_ObjectHideFlags: 0

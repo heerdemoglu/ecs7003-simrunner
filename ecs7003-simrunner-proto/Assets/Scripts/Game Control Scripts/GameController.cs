@@ -50,6 +50,7 @@ public class GameController : MonoBehaviour
             {
                 Time.timeScale = 1;
                 pausePanel.SetActive(false);
+                settingPanel.SetActive(false);
             }
             else
             {
@@ -104,5 +105,19 @@ public class GameController : MonoBehaviour
     {
         settingPanel.SetActive(false);
     }
+    //public void setAcceleration(float sliderAcceleration)
+    //{
+    //    GameObject player = GameObject.FindGameObjectWithTag("Player");
+    //    player.GetComponent<PlayerController>().acceleration = sliderAcceleration;
+
+    //}
+    //public void setRotation(float sliderRotation)
+    //{
+    //    GameObject player = GameObject.FindGameObjectWithTag("Player");
+    //    player.GetComponent<PlayerController>().rotationSpeed = sliderRotation;
+
+    //}
+
+
 }
 
