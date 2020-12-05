@@ -22,7 +22,7 @@ public class Zone : MonoBehaviour
         acceleration = player.GetComponent<PlayerController>().acceleration;
         if (chasing)
         {
-            transform.position = transform.position + (Vector3.forward * speed * Time.deltaTime);
+            transform.position = transform.position + (Vector3.forward * acceleration * speed * Time.deltaTime);
         }
     }
 
