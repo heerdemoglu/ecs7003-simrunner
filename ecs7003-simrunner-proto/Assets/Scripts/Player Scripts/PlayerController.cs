@@ -168,7 +168,7 @@ public class PlayerController : MonoBehaviour
         RaycastHit hit;
  
         //Bottom of controller. Slightly above ground so it doesn't bump into slanted platforms. (Adjust to your needs)
-        Vector3 p1 = transform.position + Vector3.up * 0.25f;
+        Vector3 p1 = transform.position + Vector3.up * 0.1f;
         //Top of controller
         Vector3 p2 = p1 + Vector3.up * controller.height;
  
