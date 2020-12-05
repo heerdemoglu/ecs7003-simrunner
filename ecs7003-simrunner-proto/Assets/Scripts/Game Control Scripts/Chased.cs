@@ -12,7 +12,7 @@ public class Chased : MonoBehaviour
     //private Color originalColor;
     //public Color zoneLightColor;
     public float highestIntensity = 4f;
-    private float lowestIntensity = 0f;
+    //private float lowestIntensity = 0f;
 
     private Light zlight;
 
@@ -94,37 +94,5 @@ public class Chased : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawLine(transform.position, zon.transform.position);
     }
-    // Update is called once per frame
-    //void FixedUpdate()
-    //{
-    //    int layerMask = 9;//9 is zone layer
-    //    RaycastHit hit;
-    //    if (Physics.Raycast(transform.position, Vector3.back, out hit, Mathf.Infinity, layerMask))
-    //    {
-    //        Debug.DrawRay(transform.position, Vector3.back, Color.red);
-
-    //        distanceToZone = transform.position.z - chasingZone.transform.position.z;
-
-    //        if (distanceToZone < deathTier)
-    //        {
-    //            Debug.Log("made contact");
-
-    //            gameController.gameOver();
-    //        }
-    //        else if (distanceToZone < nearTier)
-    //        {
-    //            Debug.Log("Within nearTier");
-    //        }
-    //        else if (distanceToZone < midTier)
-    //        {
-    //            Debug.Log("Within midTier");
-    //        }
-    //        else if (distanceToZone < farTier)
-    //        {
-    //            Debug.Log("Within farTier");
-    //        }
-
-
-    //    }
-    //}
+    
 }

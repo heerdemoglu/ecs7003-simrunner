@@ -21,22 +21,15 @@ public class GameController : MonoBehaviour
     //displays
     public GameObject gameOverOptions;
     public GameObject pausePanel;
+    public GameObject settingPanel;
 
     void Start()
     {
         GameObject chasingZone = GameObject.FindGameObjectWithTag("Zone");
         zone = chasingZone.GetComponent<Zone>();
+        pausePanel.SetActive(false);
+        settingPanel.SetActive(false);
     }
-    //IEnumerator fadeIn()
-    //{
-    //    GameObject cam = GameObject.FindGameObjectWithTag("MainCamera");
-    //    Fade fade = cam.GetComponent<Fade>();
-    //    //float fadeTime = fade.FadeIn();
-    //    yield return new WaitForSeconds(fade.fadeTime);
-    //    stopTimer = false;
-    //    startTime = Time.time;
-
-    //}
 
     void Update()
     {
@@ -101,6 +94,15 @@ public class GameController : MonoBehaviour
         stopTimer = true;
         timerText.color = Color.red;
 
+    }
+
+    public void openSettings()
+    {
+        settingPanel.SetActive(true);
+    }
+    public void closeSettings()
+    {
+        settingPanel.SetActive(false);
     }
 }
 
