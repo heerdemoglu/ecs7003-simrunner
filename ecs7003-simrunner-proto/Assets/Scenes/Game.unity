@@ -662,15 +662,15 @@ MonoBehaviour:
   tileLen: 30
   playerTransform: {fileID: 543450653565801567}
   noOfAliveBounds: 15
-  noOfTilesPerBound: 150
+  noOfTilesPerBound: 200
   spawnOffset: 30
-  spawnTileValues: {x: 100, y: 100, z: 100}
-  rotationValues: {x: 15, y: 15, z: 15}
-  movingTiles: 100
-  rotatingTiles: 100
+  spawnTileValues: {x: 500, y: 500, z: 500}
+  rotationValues: {x: 125, y: 125, z: 125}
+  movingTiles: 150
+  rotatingTiles: 150
   randomRotationValues: {x: 50, y: 50, z: 50}
-  tileMovementSpeed: 10
-  tileRotationSpeed: 50
+  tileMovementSpeed: 15
+  tileRotationSpeed: 90
 --- !u!4 &1519265993
 Transform:
   m_ObjectHideFlags: 0
@@ -904,13 +904,13 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 1.6
-  m_Radius: 0.15
-  m_SlopeLimit: 60
-  m_StepOffset: 0.2
-  m_SkinWidth: 0.002
+  m_Height: 2
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.3, z: 0}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1 &9171100422045005
 GameObject:
   m_ObjectHideFlags: 0
@@ -1637,7 +1637,7 @@ Light:
   serializedVersion: 10
   m_Type: 1
   m_Shape: 0
-  m_Color: {r: 0.990566, g: 0, b: 0, a: 1}
+  m_Color: {r: 0.49562645, g: 0, b: 1, a: 1}
   m_Intensity: 0
   m_Range: 10
   m_SpotAngle: 30
@@ -2134,6 +2134,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b20935a25295d946854d800cf1121df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 0
+  initialDistance: 10
 --- !u!4 &3222878443646369543
 Transform:
   m_ObjectHideFlags: 0

@@ -165,6 +165,8 @@ public class PlayerController : MonoBehaviour
             RecalculateVelocityX();
             controller.Move(wallSurfaceVector * velocityZ * 2f * Time.deltaTime);
             transform.Rotate(0, -velocityX, 0);
+
+
             velocityY = 0f;
             distanceToGround = 0f;
             transform.rotation = Quaternion.LookRotation(wallSurfaceVector);
@@ -358,6 +360,8 @@ public class PlayerController : MonoBehaviour
         RecalculateVelocityX();
         transform.Rotate(0, -velocityX, 0);
         
+        // Local to world space translation is required to move in correct direction:
+        // This adds taken movement capability:
         horizontalMove = transform.TransformDirection(horizontalMove);
         combinedMovement += horizontalMove;
     }
@@ -367,6 +371,8 @@ public class PlayerController : MonoBehaviour
     {
         RecalculateVelocityY();
         verticalMove.y = velocityY;
+        verticalMove = transform.TransformDirection(verticalMove);
+
         combinedMovement += verticalMove;
     }
 
