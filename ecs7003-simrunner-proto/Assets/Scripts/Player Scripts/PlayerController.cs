@@ -3,6 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+// enum of all possible movement states
+public enum Status { 
+    idle, idleTurnright, idleTurnLeft, 
+    walking, walkingBackwards, 
+    running, wallRunning, 
+    jumping, falling, 
+    dies 
+}
+
 /**
  * Other implementation of player controller
  */
@@ -68,10 +77,15 @@ public class PlayerController : MonoBehaviour
     int isJumpingHash;
     int isJumpAnticipPlayingHash;
 
+    //status
+    Status status;
+
     // Start is called before the first frame update
     void Start()
     {
         //Slider aSlider = accelerationSlider.GetComponent<Slider>();
+
+        status = Status.falling;//initially falling
         
         //start breathing sound and running sound
         audioManager = FindObjectOfType<AudioManager>();
@@ -111,37 +125,23 @@ public class PlayerController : MonoBehaviour
         RegisterUserInputs();
         currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
         distanceToGround = playerRotator.GetDistanceFromGround();//using the rotator object info
-        isGrounded = distanceToGround < 0.15f;
+        isGrounded = distanceToGround < 0.3f;
 
         // Get the desired velocity addition values
         RecalculateVelocityX(leftPressed, rightPressed);
         RecalculateVelocityY(isGrounded, jumpPressed);
         RecalculateVelocityZ(backwardPressed, forwardPressed);
-
-        Debug.Log(velocityZ);
-
-        // Reset combined movement vector
-        combinedMovement = Vector3.zero; // (0,0,0)
-
-
+        //Update status
+        UpdateStatus();        
         // Set audio sounds
-        audioManager.SetVolume("running", Mathf.Abs(velocityZ)/2f);
-        audioManager.SetMute("running", !isGrounded);// Do this in statemanager instead
-
-
-        // horizontal movement in Z direction
-        MovePlayer(); // (xDir, 0, zDir)
-        //rotate in X
-        TankRotatePlayer();
-        // jumping and gravity
-        JumpAndGravity(); // (xDir, 0, zDir) --> (xDir, YDIR, zDir) ==> (xDir + jumpXProj, jumpYProj , zDir)  ::: Gravity -- (xDir + jumpXProj- gravXProj, jumpYProj - gravYProj , zDir) (IGNORE)
-        // apply the combined movement vector
-        combinedMovement = transform.TransformDirection(combinedMovement);
-        controller.Move(combinedMovement * Time.deltaTime);
-
+        UpdateStateDependentFeatures(status);
+        //move the character
+        UpdateMovement();
         // assign values to animator parameters
         AssignAnimatorParameters();
     }
+
+    /* ******************* INPUT ****************************************** */
 
     // get input from user and set local variables - true if pressed
     void RegisterUserInputs()
@@ -154,9 +154,60 @@ public class PlayerController : MonoBehaviour
         jumpPressed = Input.GetKey(KeyCode.Space);
     }
 
+    /* ******************* STATUS ****************************************** */
 
+    // Switch between the enum player states
+    void UpdateStatus()
+    {
+        if(!isGrounded && velocityY> 0f)
+            status = Status.jumping;
+        else if(!isGrounded && velocityY < 0f)
+            status = Status.falling;
+        else if(velocityZ > maximumWalkVelocity)
+            status = Status.running;
+        else if(velocityZ > 0f)
+            status = Status.walking;
+        else if(velocityZ < 0f)
+            status = Status.walkingBackwards;
+        else
+            status = Status.idle;
+    }
 
+    // updating the status dependent features
+    void UpdateStateDependentFeatures(Status status){
+        Debug.Log(status);
+        switch(status)
+        {
+            case Status.idle:
+                break;
+            case Status.idleTurnright:
+                break;
+            case Status.idleTurnLeft:
+                break;
+            case Status.walking:
+                break;
+            case Status.walkingBackwards:
+                break;
+            case Status.running:
+                break;
+            case Status.wallRunning:
+                break;
+            case Status.jumping:
+                break;
+            case Status.falling:
+                break;
+            case Status.dies:
+                break;
+            default:
+                Debug.Log("this shouldn't happen");
+                break;
+        }
 
+        audioManager.SetVolume("running", Mathf.Abs(velocityZ)/2f);
+        audioManager.SetMute("running", !isGrounded);// Do this in statemanager instead
+    }
+
+    /* ******************* POSITION RECALCULATIONS *************************** */
     // set new x position
     void RecalculateVelocityX_deprecated(bool leftPressed, bool rightPressed)
     {
@@ -302,7 +353,23 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    /* ******************* MOVEMENT ****************************************** */
 
+    // physically moving the character
+    void UpdateMovement()
+    {
+        // Reset combined movement vector
+        combinedMovement = Vector3.zero; // (0,0,0)
+        // horizontal movement in Z direction
+        MovePlayer(); // (xDir, 0, zDir)
+        //rotate in X
+        TankRotatePlayer();
+        // jumping and gravity
+        JumpAndGravity(); // (xDir, 0, zDir) --> (xDir, YDIR, zDir) ==> (xDir + jumpXProj, jumpYProj , zDir)  ::: Gravity -- (xDir + jumpXProj- gravXProj, jumpYProj - gravYProj , zDir) (IGNORE)
+        // apply the combined movement vector
+        combinedMovement = transform.TransformDirection(combinedMovement);
+        controller.Move(combinedMovement * Time.deltaTime);
+    }
     // horizontal movement calculations
     void MovePlayer()
     {
@@ -313,6 +380,7 @@ public class PlayerController : MonoBehaviour
         //horizontalMove = transform.TransformDirection(horizontalMove);
         combinedMovement += horizontalMove;
     }
+    // 
     void TankRotatePlayer()
     {
         transform.Rotate(0, -velocityX, 0);
@@ -321,13 +389,11 @@ public class PlayerController : MonoBehaviour
     void JumpAndGravity()
     {
         verticalMove.y = velocityY;
-        //verticalMove = transform.TransformDirection(verticalMove);
-
         combinedMovement += verticalMove;
     }
 
 
-
+    /* ******************* USER ADJUSTMENTS ********************************** */
 
     public void adjustAcceleration(float sliderAcceleration)
     {
@@ -339,8 +405,9 @@ public class PlayerController : MonoBehaviour
         rotationSpeed = sliderRotation;
     }
 
+    /* ******************* ANIMATION ****************************************** */
 
-    // Add
+    // Assign animation parameters to the animator component
     void AssignAnimatorParameters()
     {
         animator.SetFloat(VelocityXHash, -velocityX);
