@@ -29,6 +29,9 @@ public class GameController : MonoBehaviour
         zone = chasingZone.GetComponent<Zone>();
         pausePanel.SetActive(false);
         settingPanel.SetActive(false);
+
+        //start background music
+        FindObjectOfType<AudioManager>().Play("game background music", true);
     }
 
     void Update()
