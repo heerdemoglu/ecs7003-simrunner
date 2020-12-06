@@ -21,7 +21,14 @@ public class PlayerRotation : MonoBehaviour {
 			surfaceNormal = hit.normal; // Assign the normal of the surface to surfaceNormal
 			forwardRelativeToSurfaceNormal = Vector3.Cross(transform.right, surfaceNormal);
 			Quaternion targetRotation = Quaternion.LookRotation(forwardRelativeToSurfaceNormal, surfaceNormal); //check For target Rotation.
-			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 3); //Rotate Character accordingly.
+			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 4); //Rotate Character accordingly.
 		}
+	}
+
+	//Method for supplying the hit distance - returns arbitrarily large float if no hit
+	public float GetDistanceFromGround()
+	{
+		if(hit.collider) return hit.distance;
+		else return 1000f;//check for this in PlayerController
 	}
 }

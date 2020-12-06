@@ -28,18 +28,9 @@ public class PlayerController : MonoBehaviour
     //gravity
     public float Gravity = Physics.gravity.y;
 
-    public bool isWallrunning = false;
-    public bool isOnSlope = false;
-    
-    public GameObject raycastReference;
-    public Text distanceText;
-    public Text velocityText;
-    public Text neVelText;
-
     // private fields for referencing other objects
     Animator animator;
     CharacterController controller;
-    // WallRunning wallRunningObject;
 
     // Vectors
     Vector3 horizontalMove = Vector3.zero;
@@ -56,7 +47,6 @@ public class PlayerController : MonoBehaviour
     float maximumWalkVelocity;
     float maximumRunVelocity;
     float currentMaxVelocity;
-    float rotationVelocity;
     float jumpHeight;
     float clampingThreshold = 0.05f;
 
@@ -89,6 +79,7 @@ public class PlayerController : MonoBehaviour
     RaycastHit rayHit;
     public GameObject myMesh;
     public AudioManager audioManager;
+    public PlayerRotation playerRotator;
 
     // Start is called before the first frame update
     void Start()
@@ -99,8 +90,8 @@ public class PlayerController : MonoBehaviour
         audioManager = FindObjectOfType<AudioManager>();
         audioManager.Play("breathing", true);
         audioManager.Play("running", true);
-
         
+        //SLIDERs
         accelerationSlider.maxValue = maxSlider;
         accelerationSlider.minValue = minSlider;
         accelerationSlider.value = intitialAcceleration;
@@ -112,6 +103,7 @@ public class PlayerController : MonoBehaviour
 
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
+        playerRotator = GetComponent<PlayerRotation>();
 
         distance = controller.radius + 0.2f;
         //First add a Layer name to all platforms (I used MovingPlatform)
@@ -125,7 +117,6 @@ public class PlayerController : MonoBehaviour
         maximumRunVelocity = acceleration;
         maximumWalkVelocity = maximumRunVelocity/2f;
         currentMaxVelocity = maximumWalkVelocity;
-        rotationVelocity = 1f;
         jumpHeight = 5f;
 
         // set hashes
@@ -140,97 +131,39 @@ public class PlayerController : MonoBehaviour
     {   
         RegisterUserInputs();
         currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
+        distanceToGround = playerRotator.GetDistanceFromGround();//using the rotator object info
+        isGrounded = distanceToGround < 0.15f;
 
-        // Reset combined movement vector
-        combinedMovement = Vector3.zero; // (0,0,0)
-
+        // Get the desired velocity addition values
         RecalculateVelocityX(leftPressed, rightPressed);
         RecalculateVelocityY(isGrounded, jumpPressed);
         RecalculateVelocityZ(backwardPressed, forwardPressed);
 
         Debug.Log(velocityZ);
 
-        if(velocityZ > 0f) {
+        // Reset combined movement vector
+        combinedMovement = Vector3.zero; // (0,0,0)
+
+
+        // Set audio sounds
+        if(velocityZ > 0.1f || velocityZ < -0.1f) {
             audioManager.SetVolume("running", velocityZ/2f);
         }
-        audioManager.SetMute("running", !isGrounded);
+        audioManager.SetMute("running", !isGrounded);// Do this in statemanager instead
 
-        // not wallrunning
-        // if(!hasCollided)
-        // {
-        //     if(!TestThisShit())
-        //     {
-                Debug.Log("Not wallrunning");
-                // determine vertical position
-                RaycastHit rayCastHit = RaycastDownwards();
-                isGrounded = distanceToGround < 0.15f;
-                // horizontal movement - x and z
-                MovePlayer(); // (xDir, 0, zDir)
-                TankRotatePlayer();
-                // jumping and gravity
-                JumpAndGravity(); // (xDir, 0, zDir) --> (xDir, YDIR, zDir) ==> (xDir + jumpXProj, jumpYProj , zDir)  ::: Gravity -- (xDir + jumpXProj- gravXProj, jumpYProj - gravYProj , zDir) (IGNORE)
-                // apply the combined movement vector
-                combinedMovement = transform.TransformDirection(combinedMovement);
-                controller.Move(combinedMovement * Time.deltaTime);
-        //     }
-        // }
-        // // wallrunning
-        // else
-        // {
-        //     Debug.Log("Wallrunning");
-        //     GameObject wallThatWasHit = rayHit.transform.gameObject;
-        //     Vector3 wallSurfaceVector = wallThatWasHit.transform.forward;
-        //     // Debug.Log(wallThatWasHit.transform.forward);
-        //     // Debug.DrawRay(rayHit.transform.position, wallThatWasHit.transform.forward, Color.green);
-        //     controller.Move(wallSurfaceVector * velocityZ * 2f * Time.deltaTime);
-        //     TankRotatePlayer();
 
-        //     // velocityY = 0f;
-        //     // distanceToGround = 0f;
-        //     transform.rotation = Quaternion.LookRotation(wallSurfaceVector);
-        //     myMesh.transform.rotation = Quaternion.FromToRotation(Vector3.up, rayHit.normal);
-        //     transform.position 
-        //         = new Vector3(transform.position.x-0.45f, transform.position.y, transform.position.z);
-        //     // Debug.Log(myMesh.transform.rotation);
-        //     // float smooth = 5.0f;
-        //     // Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(wallSurfaceVector),  Time.deltaTime * smooth);
-        //     // myMesh.transform.rotation.z = 90f;
+        // horizontal movement in Z direction
+        MovePlayer(); // (xDir, 0, zDir)
+        //rotate in X
+        TankRotatePlayer();
+        // jumping and gravity
+        JumpAndGravity(); // (xDir, 0, zDir) --> (xDir, YDIR, zDir) ==> (xDir + jumpXProj, jumpYProj , zDir)  ::: Gravity -- (xDir + jumpXProj- gravXProj, jumpYProj - gravYProj , zDir) (IGNORE)
+        // apply the combined movement vector
+        combinedMovement = transform.TransformDirection(combinedMovement);
+        controller.Move(combinedMovement * Time.deltaTime);
 
-        //     if(jumpPressed)
-        //     {
-        //         hasCollided = false;
-        //     }
-        // }
-
-        // displaying text on UI
-        DisplayUI();
         // assign values to animator parameters
         AssignAnimatorParameters();
-    }
-
-    // get the hit here if any 
-    bool TestThisShit(){
-        RaycastHit hit;
- 
-        //Bottom of controller. Slightly above ground so it doesn't bump into slanted platforms. (Adjust to your needs)
-        Vector3 p1 = transform.position + Vector3.up * 0.1f;
-        //Top of controller
-        Vector3 p2 = p1 + Vector3.up * controller.height;
- 
-        //Check around the character in a 360, 10 times (increase if more accuracy is needed)
-        for(int i=0; i<360; i+= 36){
-            //Check if anything with the platform layer touches this object
-            if (Physics.CapsuleCast(p1, p2, 0, new Vector3(Mathf.Cos(i), 0, Mathf.Sin(i)), out hit, distance, 1<<platLayer)){
-                //If the object is touched by a platform, move the object away from it
-                controller.Move(hit.normal*(distance-hit.distance));
-                hasCollided = true;
-                Debug.Log("wallrunning activated");
-                rayHit = hit;
-                return true;
-            }
-        }
-        rayHit = new RaycastHit();
-        return false;
     }
 
     // get input from user and set local variables - true if pressed
@@ -251,23 +184,23 @@ public class PlayerController : MonoBehaviour
     void RecalculateVelocityX(bool leftPressed, bool rightPressed)
     {
         // left accelerate
-        if(leftPressed && velocityX > -rotationVelocity)
+        if(leftPressed && velocityX > -rotationSpeed)
         {
             velocityX -= Time.deltaTime * acceleration;
         }
         // clamp left to max
-        if(leftPressed && velocityX < -rotationVelocity)
+        if(leftPressed && velocityX < -rotationSpeed)
         {
             // velocityX = -currentMaxVelocity/2f;
             velocityX += Time.deltaTime * deceleration;
         }
         // right accelerate
-        if(rightPressed && velocityX < rotationVelocity)
+        if(rightPressed && velocityX < rotationSpeed)
         {
             velocityX += Time.deltaTime * acceleration;
         }
         // clamp left to max
-        if(rightPressed && velocityX > rotationVelocity)
+        if(rightPressed && velocityX > rotationSpeed)
         {
             // velocityX = currentMaxVelocity/2f;
             velocityX -= Time.deltaTime * deceleration;
@@ -407,47 +340,9 @@ public class PlayerController : MonoBehaviour
     {
         rotationSpeed = sliderRotation;
     }
-    // // JUMP make player jump
-    // // NEW approach
-    // if (isGrounded && jumpPressed && !isJumping && !isJumpAnticipPlaying){
-    //     isJumpAnticipPlaying = true;
-    //     animator.SetBool(isJumpAnticipPlayingHash, true);
-    //     // 2. play jumpAnticipation() - trigger it in animator?
 
-    //     //      - have a separate blend tree for jumpAnticipation?
-    //     //      - or blend the existing tree with the antip anim            
-    //     //  3. have an event in that animation that calls the jumpPlayer function here?
-    //     //      - only at this point, this function increases the velocityY
-    // }
-    //
-    RaycastHit RaycastDownwards()
-    {
-        RaycastHit rayCastHit;
-        Vector3 p1 = transform.position + controller.center;
 
-        if(Physics.SphereCast(
-            p1 + new Vector3(0,0.1f,0), 
-            controller.height/2 , 
-            Vector3.down, 
-            out rayCastHit, 
-            10)
-        ){
-            groundSlopeAngle = Vector3.Angle(rayCastHit.normal, Vector3.up);
-            distanceToGround = rayCastHit.distance;
-        }
-
-        return rayCastHit;
-    }
-
-    //
-    void DisplayUI()
-    {
-        distanceText.text = distanceToGround.ToString();;
-        velocityText.text = velocityY.ToString();
-        neVelText.text = groundSlopeAngle.ToString();
-    }
-
-    // 
+    // Add
     void AssignAnimatorParameters()
     {
         animator.SetFloat(VelocityXHash, -velocityX);
