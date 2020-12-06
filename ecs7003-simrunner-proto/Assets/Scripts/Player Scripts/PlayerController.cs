@@ -150,6 +150,7 @@ public class PlayerController : MonoBehaviour
                 // jumping and gravity
                 JumpAndGravity(); // (xDir, 0, zDir) --> (xDir, YDIR, zDir) ==> (xDir + jumpXProj, jumpYProj , zDir)  ::: Gravity -- (xDir + jumpXProj- gravXProj, jumpYProj - gravYProj , zDir) (IGNORE)
                 // apply the combined movement vector
+                combinedMovement = transform.TransformDirection(combinedMovement);
                 controller.Move(combinedMovement * Time.deltaTime);
             }
         }
@@ -362,7 +363,7 @@ public class PlayerController : MonoBehaviour
         
         // Local to world space translation is required to move in correct direction:
         // This adds taken movement capability:
-        horizontalMove = transform.TransformDirection(horizontalMove);
+        //horizontalMove = transform.TransformDirection(horizontalMove);
         combinedMovement += horizontalMove;
     }
 
@@ -371,7 +372,7 @@ public class PlayerController : MonoBehaviour
     {
         RecalculateVelocityY();
         verticalMove.y = velocityY;
-        verticalMove = transform.TransformDirection(verticalMove);
+        //verticalMove = transform.TransformDirection(verticalMove);
 
         combinedMovement += verticalMove;
     }
