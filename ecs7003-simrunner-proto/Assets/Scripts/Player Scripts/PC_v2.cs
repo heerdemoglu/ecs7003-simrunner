@@ -3,31 +3,55 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/**
+ * Other implementation of player controller
+ */
 public class PC_v2 : MonoBehaviour
 {
-    [Header("Speed & Gravity Settings:")]
-    [Range(2f, 4f)] public float acceleration = 2.5f;
-    [SerializeField] private float gravity = Physics.gravity.y;
+    // speed
+    [Range(1f, 4f)]
+    public float acceleration;
 
-    [Header("Character States:")]
-    [SerializeField] private bool isWallrunning = false;
-    [SerializeField] private bool isOnSlope = false;
+    // rotation speed
+    [Range(1f, 4f)]
+    public float rotationSpeed;
 
-    [Header("Setup: Game Objects and Animators:")]
+    //settings sliders
+    public Slider accelerationSlider;
+    public float intitialAcceleration = 2f;
+    public Slider rotationSlider;
+    public float intitialRotation = 0.3f;
+
+    public float maxSlider = 4f;
+    public float minSlider = 1f;
+
+    //gravity
+    public float Gravity = Physics.gravity.y;
+
+    public bool isWallrunning = false;
+    public bool isOnSlope = false;
+
     public GameObject raycastReference;
-    public GameObject myMesh;
     public Text distanceText;
     public Text velocityText;
     public Text neVelText;
 
-    // Vectors:
+    // private fields for referencing other objects
+    Animator animator;
+    CharacterController controller;
+    // WallRunning wallRunningObject;
+
+    // Vectors
     Vector3 horizontalMove = Vector3.zero;
     Vector3 verticalMove = Vector3.zero;
     Vector3 slippingMove = Vector3.zero;
     Vector3 combinedMovement = Vector3.zero;
 
-    // Private Variables for tracking Velocities:
-    float velocityX, velocityY, velocityZ = 0.0f;
+    // private variables to track velocity values - sent to animator
+    float velocityX = 0.0f;
+    float velocityZ = 0.0f;
+    float velocityY = 0.0f;
+
     float deceleration;
     float maximumWalkVelocity;
     float maximumRunVelocity;
@@ -36,39 +60,49 @@ public class PC_v2 : MonoBehaviour
     float jumpHeight;
     float clampingThreshold = 0.05f;
 
-    // Private fields for referencing other objects:
-    Animator animator;
-    CharacterController controller;
-    // WallRunning wallRunningObject;
-
-    // All user inputs:
-    private bool forwardPressed,
+    // states
+    bool forwardPressed,
     backwardPressed,
     rightPressed,
     leftPressed,
     runPressed,
-    jumpPressed = false;
-
-    // All character states:
-    private bool isGrounded,
+    jumpPressed,
+    isGrounded,
     wallRunRight,
     hasCollided,
     wallRunLeft = false;
 
-    // Performance boost - searching by int is faster than by String:
-    private int VelocityZHash, VelocityXHash, VelocityYHash;
-    int isJumpingHash, isJumpAnticipPlayingHash;
+    // preformance boost - searching by int is faster than by String
+    int VelocityZHash;
+    int VelocityXHash;
+    int VelocityYHash;
+    int isJumpingHash;
+    int isJumpAnticipPlayingHash;
 
-    // Other Variables:
-    private float groundSlopeAngle = 0f;
-    private float sideFriction = 0.1f;
-    private float distanceToGround = 0f;
-    private float distance;
-    private int platLayer;
-    private RaycastHit rayHit;
+    float groundSlopeAngle = 0f;
+    float sideFriction = 0.1f;
+    float distanceToGround = 0f;
 
+
+    float distance;
+    int platLayer;
+    RaycastHit rayHit;
+    public GameObject myMesh;
+
+    // Start is called before the first frame update
     void Start()
     {
+        //Slider aSlider = accelerationSlider.GetComponent<Slider>();
+
+        accelerationSlider.maxValue = maxSlider;
+        accelerationSlider.minValue = minSlider;
+        accelerationSlider.value = intitialAcceleration;
+
+        //rotationSpeed = intitialRotation;
+        rotationSlider.maxValue = maxSlider;
+        rotationSlider.minValue = minSlider;
+        rotationSlider.value = intitialRotation;
+
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
 
@@ -97,34 +131,95 @@ public class PC_v2 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Get user inputs and set the maximum velocity according to the button combination pressed
         RegisterUserInputs();
-        currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity; RegisterUserInputs();
         currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
 
-        // Reset combined movement vector - Each update is independent from the past
-        combinedMovement = Vector3.zero;
-        /*
-        // If not touching any surface - IE on air: 
-        if(!hasCollided)
+        // Reset combined movement vector
+        combinedMovement = Vector3.zero; // (0,0,0)
+
+        // not wallrunning
+        if (!hasCollided)
         {
-            // Check if there is a surface in proximity:
-            if (!CheckProximity())
+            if (!CheckForPlatforms())
             {
                 // determine vertical position
                 RaycastHit rayCastHit = RaycastDownwards();
                 isGrounded = distanceToGround < 0.15f;
-                // horizontal movements
-                MovePlayer();
+                // horizontal movement - x and z
+                MovePlayer(); // (xDir, 0, zDir)
                 // jumping and gravity
-                JumpAndGravity();
+                JumpAndGravity(); // (xDir, 0, zDir) --> (xDir, YDIR, zDir) ==> (xDir + jumpXProj, jumpYProj , zDir)  ::: Gravity -- (xDir + jumpXProj- gravXProj, jumpYProj - gravYProj , zDir) (IGNORE)
                 // apply the combined movement vector
                 controller.Move(combinedMovement * Time.deltaTime);
             }
-        }*/
+        }
+        // wallrunning
+        else
+        {
+            GameObject wallThatWasHit = rayHit.transform.gameObject;
+            Vector3 wallSurfaceVector = wallThatWasHit.transform.forward;
+            // Debug.Log(wallThatWasHit.transform.forward);
+            // Debug.DrawRay(rayHit.transform.position, wallThatWasHit.transform.forward, Color.green);
+
+            RecalculateVelocityZ();
+            RecalculateVelocityX();
+            controller.Move(wallSurfaceVector * velocityZ * 2f * Time.deltaTime);
+            transform.Rotate(0, -velocityX, 0);
+
+
+
+            velocityY = 0f;
+            distanceToGround = 0f;
+            transform.rotation = Quaternion.LookRotation(wallSurfaceVector);
+            myMesh.transform.rotation = Quaternion.FromToRotation(Vector3.up, rayHit.normal);
+            transform.position
+                = new Vector3(transform.position.x - 0.45f, transform.position.y, transform.position.z);
+            // Debug.Log(myMesh.transform.rotation);
+            // float smooth = 5.0f;
+            // Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(wallSurfaceVector),  Time.deltaTime * smooth);
+            // myMesh.transform.rotation.z = 90f;
+
+            if (jumpPressed)
+            {
+                hasCollided = false;
+            }
+        }
+
+        // displaying text on UI
+        DisplayUI();
+        // assign values to animator parameters
+        AssignAnimatorParameters();
     }
 
-    // Gets input from user and set local variables - true if pressed
+    // get the hit here if any 
+    bool CheckForPlatforms()
+    {
+        RaycastHit hit;
+
+        //Bottom of controller. Slightly above ground so it doesn't bump into slanted platforms. (Adjust to your needs)
+        Vector3 p1 = transform.position + Vector3.up * 0.1f;
+        //Top of controller
+        Vector3 p2 = p1 + Vector3.up * controller.height;
+
+        //Check around the character in a 360, 10 times (increase if more accuracy is needed)
+        for (int i = 0; i < 360; i += 36)
+        {
+            //Check if anything with the platform layer touches this object
+            if (Physics.CapsuleCast(p1, p2, 0, new Vector3(Mathf.Cos(i), 0, Mathf.Sin(i)), out hit, distance, 1 << platLayer))
+            {
+                //If the object is touched by a platform, move the object away from it
+                controller.Move(hit.normal * (distance - hit.distance));
+                hasCollided = true;
+                Debug.Log("wallrunning activated");
+                rayHit = hit;
+                return true;
+            }
+        }
+        rayHit = new RaycastHit();
+        return false;
+    }
+
+    // get input from user and set local variables - true if pressed
     void RegisterUserInputs()
     {
         forwardPressed = Input.GetKey(KeyCode.W);
@@ -135,8 +230,6 @@ public class PC_v2 : MonoBehaviour
         jumpPressed = Input.GetKey(KeyCode.Space);
     }
 
-    // ###################################################################################
-    // Calculating X, Y, Z movements:
     // set new x position
     void RecalculateVelocityX()
     {
@@ -181,27 +274,6 @@ public class PC_v2 : MonoBehaviour
             {
                 velocityX = 0.0f;
             }
-        }
-    }
-
-    // Player jumps/falls/slipping off a slope
-    void RecalculateVelocityY()
-    {
-        // JUMP make player jump or fall
-        if (isGrounded && !jumpPressed)
-        {
-            //there is always a small force pulling character to the ground
-            // velocityY = Gravity * Time.deltaTime;
-            velocityY = 0f;
-        }
-        else if (isGrounded && jumpPressed)
-        {
-            velocityY = jumpHeight;
-            // velocityY = Mathf.Lerp(0, jumpHeight, Time.deltaTime);
-        }
-        else
-        {
-            velocityY += gravity * Time.deltaTime;
         }
     }
 
@@ -263,7 +335,28 @@ public class PC_v2 : MonoBehaviour
 
     }
 
-    // Combine movement using velocities calculated: (X,Z only)
+    // Player jumps/falls/slipping off a slope
+    void RecalculateVelocityY()
+    {
+        // JUMP make player jump or fall
+        if (isGrounded && !jumpPressed)
+        {
+            //there is always a small force pulling character to the ground
+            // velocityY = Gravity * Time.deltaTime;
+            velocityY = 0f;
+        }
+        else if (isGrounded && jumpPressed)
+        {
+            velocityY = jumpHeight;
+            // velocityY = Mathf.Lerp(0, jumpHeight, Time.deltaTime);
+        }
+        else
+        {
+            velocityY += Gravity * Time.deltaTime;
+        }
+    }
+
+    // horizontal movement calculations
     void MovePlayer()
     {
         RecalculateVelocityZ();
@@ -276,7 +369,7 @@ public class PC_v2 : MonoBehaviour
         combinedMovement += horizontalMove;
     }
 
-    // Combine movement using velocities calculated: (Y only)
+    // Jump and gravity, vertical movement calcualtions
     void JumpAndGravity()
     {
         RecalculateVelocityY();
@@ -284,52 +377,100 @@ public class PC_v2 : MonoBehaviour
         combinedMovement += verticalMove;
     }
 
-    // Check the proximity to see if you are close to any object.
-    bool CheckProximity()
+    //
+    void OnSlopeMovements(Vector3 normal)
     {
-        RaycastHit hit;
-
-        // Bottom of controller. Slightly above ground so it doesn't bump into slanted platforms. 
-        // (Adjust to your needs)
-
-        Vector3 p1 = transform.position + Vector3.up * 0.25f;
-        
-        //Top of controller
-        Vector3 p2 = p1 + Vector3.up * controller.height;
-
-        //Check around the character in a 360, 10 times (increase if more accuracy is needed)
-        for (int i = 0; i < 360; i += 36)
+        // check if there is a slipping downwards force
+        if (distanceToGround < 0.3f)
         {
-            //Check if anything with the platform layer touches this object
-            if (Physics.CapsuleCast(p1, p2, 0, new Vector3(Mathf.Cos(i), 0, Mathf.Sin(i)), out hit, distance, 1 << platLayer))
-            {
-                //If the object is touched by a platform, move the object away from it
-                controller.Move(hit.normal * (distance - hit.distance));
-                hasCollided = true;
-                Debug.Log("wallrunning activated");
-                rayHit = hit;
-                return true;
-            }
+            slippingMove.x += (1f - normal.y) * normal.x * (1f - sideFriction);
+            slippingMove.z += (1f - normal.y) * normal.z * (1f - sideFriction);
+            combinedMovement += slippingMove * Time.deltaTime * 30f;
         }
-        rayHit = new RaycastHit();
-        return false;
+        // clearing the slipping movement
+        else if (groundSlopeAngle < 10f || groundSlopeAngle > -10f)
+        {
+            slippingMove = Vector3.zero;
+        }
     }
-    // ###################################################################################
 
+    public void adjustAcceleration(float sliderAcceleration)
+    {
+        acceleration = sliderAcceleration;
 
+    }
+    public void adjustRotation(float sliderRotation)
+    {
+        rotationSpeed = sliderRotation;
+    }
+    // // JUMP make player jump
+    // // NEW approach
+    // if (isGrounded && jumpPressed && !isJumping && !isJumpAnticipPlaying){
+    //     isJumpAnticipPlaying = true;
+    //     animator.SetBool(isJumpAnticipPlayingHash, true);
+    //     // 2. play jumpAnticipation() - trigger it in animator?
 
-    // ###################################################################################
-    // Wallrun Mechanics :
+    //     //      - have a separate blend tree for jumpAnticipation?
+    //     //      - or blend the existing tree with the antip anim            
+    //     //  3. have an event in that animation that calls the jumpPlayer function here?
+    //     //      - only at this point, this function increases the velocityY
+    // }
+    //
+    RaycastHit RaycastDownwards()
+    {
+        RaycastHit rayCastHit;
+        Vector3 p1 = transform.position + controller.center;
 
-    // ###################################################################################
+        if (Physics.SphereCast(
+            p1 + new Vector3(0, 0.1f, 0),
+            controller.height / 2,
+            Vector3.down,
+            out rayCastHit,
+            10)
+        )
+        {
+            groundSlopeAngle = Vector3.Angle(rayCastHit.normal, Vector3.up);
+            distanceToGround = rayCastHit.distance;
+        }
 
+        return rayCastHit;
+    }
 
+    //
+    RaycastHit RaycastLeft()
+    {
+        RaycastHit rayCastHit;
+        Vector3 p1 = transform.position + controller.center;
 
+        if (Physics.SphereCast(
+            p1 + new Vector3(0, 0.1f, 0),
+            controller.height / 2,
+            Vector3.left,
+            out rayCastHit,
+            10)
+        )
+        {
+            groundSlopeAngle = Vector3.Angle(rayCastHit.normal, Vector3.up);
+            distanceToGround = rayCastHit.distance;
+        }
 
+        return rayCastHit;
+    }
 
+    //
+    void DisplayUI()
+    {
+        distanceText.text = distanceToGround.ToString(); ;
+        velocityText.text = velocityY.ToString();
+        neVelText.text = groundSlopeAngle.ToString();
+    }
 
-
-
-
+    // 
+    void AssignAnimatorParameters()
+    {
+        animator.SetFloat(VelocityXHash, -velocityX);
+        animator.SetFloat(VelocityZHash, velocityZ);
+        animator.SetFloat(VelocityYHash, distanceToGround);
+        animator.SetBool(isJumpingHash, !isGrounded);
+    }
 }
-
