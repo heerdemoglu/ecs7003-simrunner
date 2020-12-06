@@ -30,7 +30,7 @@ public class GameController : MonoBehaviour
         pausePanel.SetActive(false);
         settingPanel.SetActive(false);
 
-        //start background music
+        //start base background music
         FindObjectOfType<AudioManager>().Play("game background music", true);
     }
 

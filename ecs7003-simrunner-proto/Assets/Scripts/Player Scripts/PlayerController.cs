@@ -88,11 +88,18 @@ public class PlayerController : MonoBehaviour
     int platLayer;
     RaycastHit rayHit;
     public GameObject myMesh;
+    public AudioManager audioManager;
 
     // Start is called before the first frame update
     void Start()
     {
         //Slider aSlider = accelerationSlider.GetComponent<Slider>();
+        
+        //start breathing sound and running sound
+        audioManager = FindObjectOfType<AudioManager>();
+        audioManager.Play("breathing", true);
+        audioManager.Play("running", true);
+
         
         accelerationSlider.maxValue = maxSlider;
         accelerationSlider.minValue = minSlider;
@@ -141,11 +148,19 @@ public class PlayerController : MonoBehaviour
         RecalculateVelocityY(isGrounded, jumpPressed);
         RecalculateVelocityZ(backwardPressed, forwardPressed);
 
+        Debug.Log(velocityZ);
+
+        if(velocityZ > 0f) {
+            audioManager.SetVolume("running", velocityZ/2f);
+        }
+        audioManager.SetMute("running", !isGrounded);
+
         // not wallrunning
-        if(!hasCollided)
-        {
-            if(!TestThisShit())
-            {
+        // if(!hasCollided)
+        // {
+        //     if(!TestThisShit())
+        //     {
+                Debug.Log("Not wallrunning");
                 // determine vertical position
                 RaycastHit rayCastHit = RaycastDownwards();
                 isGrounded = distanceToGround < 0.15f;
@@ -157,34 +172,35 @@ public class PlayerController : MonoBehaviour
                 // apply the combined movement vector
                 combinedMovement = transform.TransformDirection(combinedMovement);
                 controller.Move(combinedMovement * Time.deltaTime);
-            }
-        }
-        // wallrunning
-        else
-        {
-            GameObject wallThatWasHit = rayHit.transform.gameObject;
-            Vector3 wallSurfaceVector = wallThatWasHit.transform.forward;
-            // Debug.Log(wallThatWasHit.transform.forward);
-            // Debug.DrawRay(rayHit.transform.position, wallThatWasHit.transform.forward, Color.green);
-            controller.Move(wallSurfaceVector * velocityZ * 2f * Time.deltaTime);
-            TankRotatePlayer();
+        //     }
+        // }
+        // // wallrunning
+        // else
+        // {
+        //     Debug.Log("Wallrunning");
+        //     GameObject wallThatWasHit = rayHit.transform.gameObject;
+        //     Vector3 wallSurfaceVector = wallThatWasHit.transform.forward;
+        //     // Debug.Log(wallThatWasHit.transform.forward);
+        //     // Debug.DrawRay(rayHit.transform.position, wallThatWasHit.transform.forward, Color.green);
+        //     controller.Move(wallSurfaceVector * velocityZ * 2f * Time.deltaTime);
+        //     TankRotatePlayer();
 
-            // velocityY = 0f;
-            // distanceToGround = 0f;
-            transform.rotation = Quaternion.LookRotation(wallSurfaceVector);
-            myMesh.transform.rotation = Quaternion.FromToRotation(Vector3.up, rayHit.normal);
-            transform.position 
-                = new Vector3(transform.position.x-0.45f, transform.position.y, transform.position.z);
-            // Debug.Log(myMesh.transform.rotation);
-            // float smooth = 5.0f;
-            // Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(wallSurfaceVector),  Time.deltaTime * smooth);
-            // myMesh.transform.rotation.z = 90f;
+        //     // velocityY = 0f;
+        //     // distanceToGround = 0f;
+        //     transform.rotation = Quaternion.LookRotation(wallSurfaceVector);
+        //     myMesh.transform.rotation = Quaternion.FromToRotation(Vector3.up, rayHit.normal);
+        //     transform.position 
+        //         = new Vector3(transform.position.x-0.45f, transform.position.y, transform.position.z);
+        //     // Debug.Log(myMesh.transform.rotation);
+        //     // float smooth = 5.0f;
+        //     // Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(wallSurfaceVector),  Time.deltaTime * smooth);
+        //     // myMesh.transform.rotation.z = 90f;
 
-            if(jumpPressed)
-            {
-                hasCollided = false;
-            }
-        }
+        //     if(jumpPressed)
+        //     {
+        //         hasCollided = false;
+        //     }
+        // }
 
         // displaying text on UI
         DisplayUI();
@@ -366,12 +382,10 @@ public class PlayerController : MonoBehaviour
         //horizontalMove = transform.TransformDirection(horizontalMove);
         combinedMovement += horizontalMove;
     }
-
     void TankRotatePlayer()
     {
         transform.Rotate(0, -velocityX, 0);
     }
-
     // Jump and gravity, vertical movement calcualtions
     void JumpAndGravity()
     {
@@ -415,26 +429,6 @@ public class PlayerController : MonoBehaviour
             p1 + new Vector3(0,0.1f,0), 
             controller.height/2 , 
             Vector3.down, 
-            out rayCastHit, 
-            10)
-        ){
-            groundSlopeAngle = Vector3.Angle(rayCastHit.normal, Vector3.up);
-            distanceToGround = rayCastHit.distance;
-        }
-
-        return rayCastHit;
-    }
-
-    //
-    RaycastHit RaycastLeft()
-    {
-        RaycastHit rayCastHit;
-        Vector3 p1 = transform.position + controller.center;
-
-        if(Physics.SphereCast(
-            p1 + new Vector3(0,0.1f,0), 
-            controller.height/2 , 
-            Vector3.left,
             out rayCastHit, 
             10)
         ){

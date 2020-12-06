@@ -13,4 +13,5 @@ public class Sound
 
     [HideInInspector]//don't show it in inspector
     public AudioSource source;//the source for the audio file
+    public bool loop;//for toggling loop
 }
