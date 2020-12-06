@@ -7,6 +7,9 @@ public class PlayerRotation : MonoBehaviour {
 	RaycastHit hit;  //For Detect Sureface/Base.
 	Vector3 surfaceNormal;  //The normal of the surface the ray hit.
 	Vector3 forwardRelativeToSurfaceNormal;  //For Look Rotation
+	GameObject currentWall;//Reference storing the wall the player is closest to
+	GameObject closestWall;//Reference storing the wall the player is closest to
+
 	
 	void Start()
 	{
@@ -16,15 +19,27 @@ public class PlayerRotation : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+		//find new hit
 		// FindClosestObject();
-		// // CharacterFaceRelativeToSurface();
+		// //update what is the currently the closest wall
+		// closestWall = (hit.collider) ? hit.transform.gameObject : null;
+
+		// // switching walls
+		// if (closestWall != currentWall){
+		// 	CharacterFaceRelativeToSurface();
+		// 	currentWall = closestWall;//set currently active wall
+		// }
+
+
+		// // Alternative try:
+		// FindClosestObject();
 		// if(_DidHitChange()) 
 		// {
 		// 	Debug.Log("change");
 		// 	CharacterFaceRelativeToSurface();
 		// }
 
-		//OLD way
+		// // OLD way
 		CharacterFaceRelativeToSurface_deprecated();
 	}
 	

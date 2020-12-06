@@ -122,22 +122,19 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {   
+        // Checks for input from user
         RegisterUserInputs();
-        currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
-        distanceToGround = playerRotator.GetDistanceFromGround();//using the rotator object info
-        isGrounded = distanceToGround < 0.3f;
-
-        // Get the desired velocity addition values
-        RecalculateVelocityX(leftPressed, rightPressed);
-        RecalculateVelocityY(isGrounded, jumpPressed);
-        RecalculateVelocityZ(backwardPressed, forwardPressed);
-        //Update status
+        // Checks character distance from closest wallpiece and sets isGrounded
+        RecalculateVerticalDistanceInfo();
+        // Calculate the current velocity additions
+        RecalculateVelocities(leftPressed, rightPressed, isGrounded, jumpPressed, backwardPressed, forwardPressed);
+        // Update status
         UpdateStatus();        
         // Set audio sounds
         UpdateStateDependentFeatures(status);
-        //move the character
+        // Move the character
         UpdateMovement();
-        // assign values to animator parameters
+        // Assign values to animator parameters
         AssignAnimatorParameters();
     }
 
@@ -208,53 +205,23 @@ public class PlayerController : MonoBehaviour
     }
 
     /* ******************* POSITION RECALCULATIONS *************************** */
-    // set new x position
-    void RecalculateVelocityX_deprecated(bool leftPressed, bool rightPressed)
+    void RecalculateVerticalDistanceInfo()
     {
-        // left accelerate
-        if(leftPressed && velocityX > -rotationSpeed)
-        {
-            velocityX -= Time.deltaTime * acceleration;
-        }
-        // clamp left to max
-        if(leftPressed && velocityX < -rotationSpeed)
-        {
-            // velocityX = -currentMaxVelocity/2f;
-            velocityX += Time.deltaTime * deceleration;
-        }
-        // right accelerate
-        if(rightPressed && velocityX < rotationSpeed)
-        {
-            velocityX += Time.deltaTime * acceleration;
-        }
-        // clamp left to max
-        if(rightPressed && velocityX > rotationSpeed)
-        {
-            // velocityX = currentMaxVelocity/2f;
-            velocityX -= Time.deltaTime * deceleration;
-        }
-        // decelerate
-        // note the difference!
-        if(!leftPressed && !rightPressed)
-        {
-            // deceleration from left (turning back from left)
-            if(velocityX < 0.0f)
-            {
-                velocityX += Time.deltaTime * deceleration;
-            }
-            // deceleration from right (turning back from right)
-            if(velocityX > 0.0f)
-            {
-                velocityX -= Time.deltaTime * deceleration;
-            }
-            // clamp to min
-            if(velocityX != 0.0f && (velocityX > -clampingThreshold && velocityX < clampingThreshold))
-            {
-                velocityX = 0.0f;
-            }
-        }
+        distanceToGround = playerRotator.GetDistanceFromGround();//using the rotator object info
+        isGrounded = distanceToGround < 0.3f;
     }
 
+    void RecalculateVelocities(bool leftPressed, bool rightPressed,bool isGrounded, bool jumpPressed,bool backwardPressed, bool forwardPressed)
+    {
+        //set the speed limit
+        currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
+
+        // Get the desired velocity addition values
+        RecalculateVelocityX(leftPressed, rightPressed);
+        RecalculateVelocityY(isGrounded, jumpPressed);
+        RecalculateVelocityZ(backwardPressed, forwardPressed);
+    }
+    // set new x position
     void RecalculateVelocityX(bool leftPressed, bool rightPressed)
     {
         // left accelerate
@@ -349,6 +316,51 @@ public class PlayerController : MonoBehaviour
         if(!backwardPressed && !forwardPressed && Mathf.Abs(velocityZ) < clampingThreshold)
         {
             velocityZ = 0f;
+        }
+    }
+        void RecalculateVelocityX_deprecated(bool leftPressed, bool rightPressed)
+    {
+        // left accelerate
+        if(leftPressed && velocityX > -rotationSpeed)
+        {
+            velocityX -= Time.deltaTime * acceleration;
+        }
+        // clamp left to max
+        if(leftPressed && velocityX < -rotationSpeed)
+        {
+            // velocityX = -currentMaxVelocity/2f;
+            velocityX += Time.deltaTime * deceleration;
+        }
+        // right accelerate
+        if(rightPressed && velocityX < rotationSpeed)
+        {
+            velocityX += Time.deltaTime * acceleration;
+        }
+        // clamp left to max
+        if(rightPressed && velocityX > rotationSpeed)
+        {
+            // velocityX = currentMaxVelocity/2f;
+            velocityX -= Time.deltaTime * deceleration;
+        }
+        // decelerate
+        // note the difference!
+        if(!leftPressed && !rightPressed)
+        {
+            // deceleration from left (turning back from left)
+            if(velocityX < 0.0f)
+            {
+                velocityX += Time.deltaTime * deceleration;
+            }
+            // deceleration from right (turning back from right)
+            if(velocityX > 0.0f)
+            {
+                velocityX -= Time.deltaTime * deceleration;
+            }
+            // clamp to min
+            if(velocityX != 0.0f && (velocityX > -clampingThreshold && velocityX < clampingThreshold))
+            {
+                velocityX = 0.0f;
+            }
         }
     }
 
