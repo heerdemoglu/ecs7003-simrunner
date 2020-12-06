@@ -726,7 +726,7 @@ MonoBehaviour:
   noOfAliveBounds: 15
   noOfTilesPerBound: 200
   spawnOffset: 30
-  spawnTileValues: {x: 500, y: 500, z: 500}
+  spawnTileValues: {x: 150, y: 150, z: 150}
   rotationValues: {x: 125, y: 125, z: 125}
   movingTiles: 150
   rotatingTiles: 150
@@ -947,14 +947,9 @@ MonoBehaviour:
   intitialRotation: 0.3
   maxSlider: 4
   minSlider: 1
+  audioManager: {fileID: 0}
+  playerRotator: {fileID: 0}
   Gravity: -9.81
-  isWallrunning: 0
-  isOnSlope: 0
-  raycastReference: {fileID: 1384078211}
-  distanceText: {fileID: 1544569351}
-  velocityText: {fileID: 363763069}
-  neVelText: {fileID: 601888057}
-  myMesh: {fileID: 1082271958427495870}
 --- !u!143 &2050734793
 CharacterController:
   m_ObjectHideFlags: 0

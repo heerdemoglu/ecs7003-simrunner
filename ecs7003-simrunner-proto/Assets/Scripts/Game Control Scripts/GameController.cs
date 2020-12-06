@@ -25,6 +25,7 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
+        Cursor.visible = false;
         GameObject chasingZone = GameObject.FindGameObjectWithTag("Zone");
         zone = chasingZone.GetComponent<Zone>();
         pausePanel.SetActive(false);
@@ -42,6 +43,7 @@ public class GameController : MonoBehaviour
         }
         if (isGameOver)
         {
+            Cursor.visible = true;
             gameOverOptions.SetActive(true);
             //AudioSource audioData = GetComponent<AudioSource>();
             //audioData.Play();
@@ -49,11 +51,13 @@ public class GameController : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.P) && !isGameOver)//dislay pause menu
         {
+            Cursor.visible = true;
             if (Time.timeScale == 0)
             {
                 Time.timeScale = 1;
                 pausePanel.SetActive(false);
                 settingPanel.SetActive(false);
+                Cursor.visible = false;
             }
             else
             {
