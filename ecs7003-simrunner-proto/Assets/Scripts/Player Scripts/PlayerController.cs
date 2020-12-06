@@ -13,24 +13,24 @@ public class PlayerController : MonoBehaviour
     public float acceleration ;
 
     // rotation speed
-    [Range(1f, 4f)]
+    [Range(2f, 4f)]
     public float rotationSpeed;
 
     //settings sliders
     public Slider accelerationSlider;
     public float intitialAcceleration = 2f;
     public Slider rotationSlider;
-    public float intitialRotation = 0.3f;
+    public float intitialRotation = 2f;
 
     public float maxSlider = 4f;
     public float minSlider = 1f;
 
-    //gravity
-    public float Gravity = Physics.gravity.y;
 
-    // private fields for referencing other objects
+    // fields referencing other objects
     Animator animator;
     CharacterController controller;
+    public AudioManager audioManager;
+    public PlayerRotation playerRotator;
 
     // Vectors
     Vector3 horizontalMove = Vector3.zero;
@@ -43,12 +43,14 @@ public class PlayerController : MonoBehaviour
     float velocityZ = 0.0f;
     float velocityY = 0.0f;
 
+    public float Gravity = Physics.gravity.y;
     float deceleration;
     float maximumWalkVelocity;
     float maximumRunVelocity;
     float currentMaxVelocity;
-    float jumpHeight;
-    float clampingThreshold = 0.05f;
+    float jumpHeight = 5f;
+    float clampingThreshold = 0.1f;
+    float distanceToGround = 0f;
 
     // states
     bool forwardPressed, 
@@ -57,10 +59,7 @@ public class PlayerController : MonoBehaviour
     leftPressed, 
     runPressed, 
     jumpPressed,
-    isGrounded,
-    wallRunRight,
-    hasCollided,
-    wallRunLeft = false;
+    isGrounded = false;
 
     // preformance boost - searching by int is faster than by String
     int VelocityZHash;
@@ -68,18 +67,6 @@ public class PlayerController : MonoBehaviour
     int VelocityYHash;
     int isJumpingHash;
     int isJumpAnticipPlayingHash;
-    
-    float groundSlopeAngle = 0f;
-    float sideFriction = 0.1f;
-    float distanceToGround = 0f;
-
-
-    float distance;
-    int platLayer;
-    RaycastHit rayHit;
-    public GameObject myMesh;
-    public AudioManager audioManager;
-    public PlayerRotation playerRotator;
 
     // Start is called before the first frame update
     void Start()
@@ -96,7 +83,7 @@ public class PlayerController : MonoBehaviour
         accelerationSlider.minValue = minSlider;
         accelerationSlider.value = intitialAcceleration;
 
-        //rotationSpeed = intitialRotation;
+        rotationSpeed = intitialRotation;
         rotationSlider.maxValue = maxSlider;
         rotationSlider.minValue = minSlider;
         rotationSlider.value = intitialRotation;
@@ -105,19 +92,11 @@ public class PlayerController : MonoBehaviour
         controller = GetComponent<CharacterController>();
         playerRotator = GetComponent<PlayerRotation>();
 
-        distance = controller.radius + 0.2f;
-        //First add a Layer name to all platforms (I used MovingPlatform)
-        //Now this script won't run on regular objects, only platforms.
-        platLayer = LayerMask.NameToLayer("Ground");
-        
-        // wallRunningObject = (WallRunning)gameObject.GetComponent(typeof(WallRunning));
-
         // set speeds
         deceleration = acceleration * 2f;
         maximumRunVelocity = acceleration;
         maximumWalkVelocity = maximumRunVelocity/2f;
         currentMaxVelocity = maximumWalkVelocity;
-        jumpHeight = 5f;
 
         // set hashes
         VelocityZHash = Animator.StringToHash("Velocity Z");
@@ -146,9 +125,7 @@ public class PlayerController : MonoBehaviour
 
 
         // Set audio sounds
-        if(velocityZ > 0.1f || velocityZ < -0.1f) {
-            audioManager.SetVolume("running", velocityZ/2f);
-        }
+        audioManager.SetVolume("running", Mathf.Abs(velocityZ)/2f);
         audioManager.SetMute("running", !isGrounded);// Do this in statemanager instead
 
 
@@ -181,7 +158,7 @@ public class PlayerController : MonoBehaviour
 
 
     // set new x position
-    void RecalculateVelocityX(bool leftPressed, bool rightPressed)
+    void RecalculateVelocityX_deprecated(bool leftPressed, bool rightPressed)
     {
         // left accelerate
         if(leftPressed && velocityX > -rotationSpeed)
@@ -224,6 +201,22 @@ public class PlayerController : MonoBehaviour
             {
                 velocityX = 0.0f;
             }
+        }
+    }
+
+    void RecalculateVelocityX(bool leftPressed, bool rightPressed)
+    {
+        // left accelerate
+        if(leftPressed && !rightPressed)
+        {
+            velocityX = -rotationSpeed;
+        }
+        else if(rightPressed && !leftPressed)
+        {
+            velocityX = rotationSpeed;
+        }
+        else {
+            velocityX = 0f;
         }
     }
     // Player jumps/falls/slipping off a slope
@@ -300,7 +293,12 @@ public class PlayerController : MonoBehaviour
         {
             velocityZ += Time.deltaTime * deceleration;
         }
-
+        
+        // clamp if no button pressed
+        if(!backwardPressed && !forwardPressed && Mathf.Abs(velocityZ) < clampingThreshold)
+        {
+            velocityZ = 0f;
+        }
     }
 
 
