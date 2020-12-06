@@ -137,6 +137,10 @@ public class PlayerController : MonoBehaviour
         // Reset combined movement vector
         combinedMovement = Vector3.zero; // (0,0,0)
 
+        RecalculateVelocityX(leftPressed, rightPressed);
+        RecalculateVelocityY(isGrounded, jumpPressed);
+        RecalculateVelocityZ(backwardPressed, forwardPressed);
+
         // not wallrunning
         if(!hasCollided)
         {
@@ -147,6 +151,7 @@ public class PlayerController : MonoBehaviour
                 isGrounded = distanceToGround < 0.15f;
                 // horizontal movement - x and z
                 MovePlayer(); // (xDir, 0, zDir)
+                TankRotatePlayer();
                 // jumping and gravity
                 JumpAndGravity(); // (xDir, 0, zDir) --> (xDir, YDIR, zDir) ==> (xDir + jumpXProj, jumpYProj , zDir)  ::: Gravity -- (xDir + jumpXProj- gravXProj, jumpYProj - gravYProj , zDir) (IGNORE)
                 // apply the combined movement vector
@@ -161,15 +166,11 @@ public class PlayerController : MonoBehaviour
             Vector3 wallSurfaceVector = wallThatWasHit.transform.forward;
             // Debug.Log(wallThatWasHit.transform.forward);
             // Debug.DrawRay(rayHit.transform.position, wallThatWasHit.transform.forward, Color.green);
-
-            RecalculateVelocityZ();
-            RecalculateVelocityX();
             controller.Move(wallSurfaceVector * velocityZ * 2f * Time.deltaTime);
-            transform.Rotate(0, -velocityX, 0);
+            TankRotatePlayer();
 
-
-            velocityY = 0f;
-            distanceToGround = 0f;
+            // velocityY = 0f;
+            // distanceToGround = 0f;
             transform.rotation = Quaternion.LookRotation(wallSurfaceVector);
             myMesh.transform.rotation = Quaternion.FromToRotation(Vector3.up, rayHit.normal);
             transform.position 
@@ -227,8 +228,11 @@ public class PlayerController : MonoBehaviour
         jumpPressed = Input.GetKey(KeyCode.Space);
     }
 
+
+
+
     // set new x position
-    void RecalculateVelocityX()
+    void RecalculateVelocityX(bool leftPressed, bool rightPressed)
     {
         // left accelerate
         if(leftPressed && velocityX > -rotationVelocity)
@@ -273,9 +277,27 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
+    // Player jumps/falls/slipping off a slope
+    void RecalculateVelocityY(bool isGrounded, bool jumpPressed)
+    {   
+        // JUMP make player jump or fall
+        if(isGrounded && !jumpPressed)
+        {
+            //there is always a small force pulling character to the ground
+            // velocityY = Gravity * Time.deltaTime;
+            velocityY = 0f;
+        }
+        else if(isGrounded && jumpPressed) {
+            velocityY = jumpHeight;
+            // velocityY = Mathf.Lerp(0, jumpHeight, Time.deltaTime);
+        }
+        else
+        {
+            velocityY += Gravity * Time.deltaTime;
+        }
+    }
     // set new forward position
-    void RecalculateVelocityZ()
+    void RecalculateVelocityZ(bool backwardPressed, bool forwardPressed)
     {
         // early exit if nothing is pressed and standing still
         if(!backwardPressed && !forwardPressed && velocityZ == 0.0f)
@@ -332,34 +354,12 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    // Player jumps/falls/slipping off a slope
-    void RecalculateVelocityY()
-    {   
-        // JUMP make player jump or fall
-        if(isGrounded && !jumpPressed)
-        {
-            //there is always a small force pulling character to the ground
-            // velocityY = Gravity * Time.deltaTime;
-            velocityY = 0f;
-        }
-        else if(isGrounded && jumpPressed) {
-            velocityY = jumpHeight;
-            // velocityY = Mathf.Lerp(0, jumpHeight, Time.deltaTime);
-        }
-        else
-        {
-            velocityY += Gravity * Time.deltaTime;
-        }
-    }
+
 
     // horizontal movement calculations
     void MovePlayer()
     {
-        RecalculateVelocityZ();
         horizontalMove = new Vector3(0, 0, velocityZ * 3f);
-
-        RecalculateVelocityX();
-        transform.Rotate(0, -velocityX, 0);
         
         // Local to world space translation is required to move in correct direction:
         // This adds taken movement capability:
@@ -367,32 +367,22 @@ public class PlayerController : MonoBehaviour
         combinedMovement += horizontalMove;
     }
 
+    void TankRotatePlayer()
+    {
+        transform.Rotate(0, -velocityX, 0);
+    }
+
     // Jump and gravity, vertical movement calcualtions
     void JumpAndGravity()
     {
-        RecalculateVelocityY();
         verticalMove.y = velocityY;
         //verticalMove = transform.TransformDirection(verticalMove);
 
         combinedMovement += verticalMove;
     }
 
-    //
-    void OnSlopeMovements(Vector3 normal)
-    {
-        // check if there is a slipping downwards force
-        if(distanceToGround < 0.3f)
-        {
-            slippingMove.x += (1f - normal.y) * normal.x * (1f - sideFriction);
-            slippingMove.z += (1f - normal.y) * normal.z * (1f - sideFriction);
-            combinedMovement += slippingMove * Time.deltaTime * 30f;
-        }
-        // clearing the slipping movement
-        else if (groundSlopeAngle < 10f || groundSlopeAngle > -10f)
-        {
-            slippingMove = Vector3.zero;
-        }
-    }
+
+
 
     public void adjustAcceleration(float sliderAcceleration)
     {
