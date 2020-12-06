@@ -662,9 +662,9 @@ MonoBehaviour:
   tileLen: 30
   playerTransform: {fileID: 543450653565801567}
   noOfAliveBounds: 15
-  noOfTilesPerBound: 250
+  noOfTilesPerBound: 150
   spawnOffset: 30
-  spawnTileValues: {x: 100, y: 100, z: 10}
+  spawnTileValues: {x: 100, y: 100, z: 100}
   rotationValues: {x: 15, y: 15, z: 15}
   movingTiles: 100
   rotatingTiles: 100
@@ -910,7 +910,7 @@ CharacterController:
   m_StepOffset: 0.2
   m_SkinWidth: 0.002
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.2, z: 0}
+  m_Center: {x: 0, y: 0.3, z: 0}
 --- !u!1 &9171100422045005
 GameObject:
   m_ObjectHideFlags: 0
@@ -1040,7 +1040,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 919132149289717477}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.55, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_Children:
   - {fileID: 1384078212}

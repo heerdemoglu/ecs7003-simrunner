@@ -21,7 +21,7 @@ public class PlayerRotation : MonoBehaviour {
 			surfaceNormal = hit.normal; // Assign the normal of the surface to surfaceNormal
 			forwardRelativeToSurfaceNormal = Vector3.Cross(transform.right, surfaceNormal); 
 			Quaternion targetRotation = Quaternion.LookRotation(forwardRelativeToSurfaceNormal, surfaceNormal); //check For target Rotation.
-			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 2); //Rotate Character accordingly.
+			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 3); //Rotate Character accordingly.
 		}
 	}
 }
