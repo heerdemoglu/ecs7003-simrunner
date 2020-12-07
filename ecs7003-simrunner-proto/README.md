@@ -36,9 +36,11 @@ The character model is taken from the following link:
 Link: mixamo.com (Ybot)
 
 The animations are taken from the following link:
-Link: mixamo.com
+Link: mixamo.com (Bundle animations of YBot)
 
 ## Inactive (Other) Assets in the Repository: (Used in Prototyping Stage)
+These are referenced as prototype code and previous iterations could be reached from this project as well. 
+
 Sci-fi Texture Pack 1: https://assetstore.unity.com/packages/2d/textures-materials/sci-fi-texture-pack-1-23301
 
 Jammo Character -https://assetstore.unity.com/packages/3d/characters/jammo-character-mix-and-jam-158456
