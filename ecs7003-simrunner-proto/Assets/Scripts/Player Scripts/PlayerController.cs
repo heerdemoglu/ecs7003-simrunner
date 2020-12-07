@@ -427,4 +427,10 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat(VelocityYHash, distanceToGround);
         animator.SetBool(isJumpingHash, !isGrounded);
     }
+
+    // //collision
+    // void OnControllerColliderHit(ControllerColliderHit hit)
+    // {
+    //     Debug.Log("hey");
+    // }
 }

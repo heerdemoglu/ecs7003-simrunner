@@ -10,41 +10,32 @@ public class PlayerRotation : MonoBehaviour {
 	GameObject currentWall;//Reference storing the wall the player is closest to
 	GameObject closestWall;//Reference storing the wall the player is closest to
 
-	
-	void Start()
-	{
-		// FindClosestObject();
-		// CharacterFaceRelativeToSurface();
-	}
+
+	float t;
+    Quaternion startRotation;
+    Quaternion targetRotation;
+    float timeToReachTarget;
 
 	// Update is called once per frame
 	void Update () {
-		//find new hit
+		closestWall = (hit.collider) ? hit.transform.gameObject : null;
+		if(GetDistanceFromGround() < 0.3f) 
+			currentWall = closestWall;
+		else
+			currentWall = null;
+
+		if(closestWall != currentWall)
+			Debug.Log("wall switched"+closestWall.GetInstanceID());
+
 		// FindClosestObject();
-		// //update what is the currently the closest wall
-		// closestWall = (hit.collider) ? hit.transform.gameObject : null;
-
-		// // switching walls
-		// if (closestWall != currentWall){
-		// 	CharacterFaceRelativeToSurface();
-		// 	currentWall = closestWall;//set currently active wall
-		// }
-
-
-		// // Alternative try:
-		// FindClosestObject();
-		// if(_DidHitChange()) 
-		// {
-		// 	Debug.Log("change");
-		// 	CharacterFaceRelativeToSurface();
-		// }
+		// if(hit.collider) CharacterFaceRelativeToSurface();
 
 		// // OLD way
-		CharacterFaceRelativeToSurface_deprecated();
+		CharacterFaceRelativeToSurface();
 	}
 	
 	//Method For Correct Character Rotation According to Surface.
-	private void CharacterFaceRelativeToSurface_deprecated()
+	private void CharacterFaceRelativeToSurface()
 	{
 		//For Detect The Base/Surface.
 		if (Physics.Raycast(transform.position, -Vector3.up, out hit, 5))
@@ -52,7 +43,7 @@ public class PlayerRotation : MonoBehaviour {
 			surfaceNormal = hit.normal; // Assign the normal of the surface to surfaceNormal
 			forwardRelativeToSurfaceNormal = Vector3.Cross(transform.right, surfaceNormal);
 			Quaternion targetRotation = Quaternion.LookRotation(forwardRelativeToSurfaceNormal, surfaceNormal); //check For target Rotation.
-			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime); //Rotate Character accordingly.
+			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 3f); //Rotate Character accordingly.
 		}
 	}
 
@@ -71,7 +62,7 @@ public class PlayerRotation : MonoBehaviour {
 					out newHit, 5)
 			){
 				//keep the hit with the closest distance
-				if(!closestHit.collider || newHit.distance <= closestHit.distance) 
+				if(!closestHit.collider || newHit.distance < closestHit.distance) 
 					closestHit = newHit;
             }
         }
@@ -80,13 +71,12 @@ public class PlayerRotation : MonoBehaviour {
 	}
 
 	//Method For Correct Character Rotation According to Surface.
-	private void CharacterFaceRelativeToSurface()
+	private void CharacterFaceRelativeToSurface360()
 	{
 		surfaceNormal = hit.normal; // Assign the normal of the surface to surfaceNormal
 		forwardRelativeToSurfaceNormal = Vector3.Cross(transform.right, surfaceNormal);
 		Quaternion targetRotation = Quaternion.LookRotation(forwardRelativeToSurfaceNormal, surfaceNormal); //check For target Rotation.
-		if(targetRotation != Quaternion.identity)
-			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime); //Rotate Character accordingly.
+		transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 3f); //Rotate Character accordingly.
 	}
 
 	//Method for supplying the hit distance - returns arbitrarily large float if no hit
@@ -110,28 +100,5 @@ public class PlayerRotation : MonoBehaviour {
 		
 		Vector3 result = pointPosition + sb * planeNormal;
 		return Vector3.Distance(pointPosition, result);
-	}
-
-
-	private bool _DidHitChange()
-	{
-		if(!hit.collider && !previousHit.collider) 
-		{
-			Debug.Log("1");
-			return false;//
-		}
-		if(hit.collider == null && previousHit.collider != null) 
-		{
-			Debug.Log("2");
-			return true;
-		}
-		if(hit.collider != null && previousHit.collider == null) 
-		{
-			Debug.Log("3");
-			return true;
-		}
-		
-		Debug.Log("4");
-		return (hit.transform.gameObject.GetInstanceID() != previousHit.transform.gameObject.GetInstanceID());
 	}
 }
