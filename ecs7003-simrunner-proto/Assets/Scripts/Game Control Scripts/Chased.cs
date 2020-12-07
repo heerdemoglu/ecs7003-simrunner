@@ -42,9 +42,7 @@ public class Chased : MonoBehaviour
     void Start()
     {
         //fade = cam.GetComponent<Fade>();
-        if (Input.GetMouseButtonDown(0)){
-            CameraShaker.Instance.ShakeOnce(shake1, shake2, shake3, shake4);
-        }
+        
         zlight = zoneLight.GetComponent<Light>();
         glight = gameLight.GetComponent<Light>();
         zlight.intensity = 0f;
@@ -67,7 +65,9 @@ public class Chased : MonoBehaviour
 
     void Update()
     {
-
+        if (Input.GetMouseButtonDown(0)){
+            CameraShaker.Instance.ShakeOnce(shake1, shake2, shake3, shake4);
+        }
         float zoneZ = zone.transform.position.z;
         distanceToZone = Mathf.Abs(transform.position.z - zoneZ);
         
