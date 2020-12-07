@@ -29,6 +29,10 @@ Link: https://wideo.co/text-to-speech/
 These audio effects are taken from the following links, downloading was free:
 Walking Sounds Link: https://freesound.org/people/InspectorJ/sounds/421022/
 Human Breathing Sounds: https://freesound.org/people/SoundMarnus/sounds/491762/
+Landing: https://freesound.org/people/IPaddeh/sounds/422869/
+Jumping: https://freesound.org/people/felixyadomi/sounds/456367/
+
+
 
 ### Character Model & Animations:
 
