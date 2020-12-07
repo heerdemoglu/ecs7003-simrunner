@@ -3,7 +3,7 @@
 ## Project Members:
 Hasan Emre Erdemoglu, Mate Krisztian, Xsara Baptiste-Wilson
 
-## Gameplay video: TBA
+## Gameplay video: https://www.youtube.com/watch?v=zyu9WipMYg4
 
 ## About Simula:
 
