@@ -59,6 +59,13 @@ public class Chased : MonoBehaviour
             zlight.intensity = Mathf.Lerp(0, highestIntensity, 1f - (distanceToZone / farTier));
             glight.intensity = Mathf.Lerp(originalIntensity, 0f, 1f - (distanceToZone / farTier));
 
+            if(transform.position.y < -0.05f)
+            {
+                Debug.Log("fell off");
+                zone.GetComponent<Zone>().pauseChase();
+                gameController.gameOver();
+            }
+
             if (distanceToZone < deathTier)
             {
                 Debug.Log("made contact");
