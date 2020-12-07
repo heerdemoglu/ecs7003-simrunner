@@ -3,28 +3,52 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+// enum of all possible movement states
+public enum Status { 
+    idle, idleTurnright, idleTurnLeft, 
+    walking, walkingBackwards, 
+    running, wallRunning, 
+    jumping, falling, 
+    landingOnNewWall, landingOnSameWall,
+    dies 
+}
+
 /**
- * Other implementation of player controller, it doesnt use WASD, directly uses Horizontal and Vertical Inputs.
- * It requires clamping setting fixed speed etc. Not used in the final product.
+ * Other implementation of player controller
  */
 public class PlayerController : MonoBehaviour
 {
     // speed
+    [Range(1f, 4f)]
+    public float acceleration ;
+
+    // rotation speed
     [Range(2f, 4f)]
-    public float acceleration = 4.0f;
-    //gravity
-    public float Gravity = Physics.gravity.y;
+    public float rotationSpeed;
+    
+    // rotation speed
+    [Range(0f, 1f)]
+    public float mainVolume;
 
-    public GameObject raycastReference;
-    public Text distanceText;
-    public Text velocityText;
-    public Text neVelText;
+    //settings sliders
+    public Slider accelerationSlider;
+    public float intitialAcceleration = 2f;
+    public Slider rotationSlider;
+    public float intitialRotation = 2f;
 
-    // private fields for referencing other objects
+    public float maxSlider = 4f;
+    public float minSlider = 1f;
+
+
+    // fields referencing other objects
     Animator animator;
     CharacterController controller;
-    Vector3 horizontalMove;
-    Vector3 verticalMove;
+    public AudioManager audioManager;
+    public PlayerRotation playerRotator;
+
+    // Vectors
+    Vector3 horizontalMove = Vector3.zero;
+    Vector3 verticalMove = Vector3.zero;
     Vector3 slippingMove = Vector3.zero;
     Vector3 combinedMovement = Vector3.zero;
 
@@ -33,13 +57,14 @@ public class PlayerController : MonoBehaviour
     float velocityZ = 0.0f;
     float velocityY = 0.0f;
 
+    public float Gravity = Physics.gravity.y;
     float deceleration;
     float maximumWalkVelocity;
     float maximumRunVelocity;
     float currentMaxVelocity;
-    float rotationVelocity;
-    float jumpHeight;
-    float clampingThreshold = 0.05f;
+    float jumpHeight = 5f;
+    float clampingThreshold = 0.1f;
+    float distanceToGround = 0f;
 
     // states
     bool forwardPressed, 
@@ -47,11 +72,9 @@ public class PlayerController : MonoBehaviour
     rightPressed, 
     leftPressed, 
     runPressed, 
-    jumpPressed = false;
-    // bool isJumping = true;
-    bool isGrounded = false;
-    public bool isWallrunning = false;
-    public bool isOnSlope = false;
+    jumpPressed,
+    isGrounded = false;
+    bool isMovementLocked = false;
 
     // preformance boost - searching by int is faster than by String
     int VelocityZHash;
@@ -59,76 +82,71 @@ public class PlayerController : MonoBehaviour
     int VelocityYHash;
     int isJumpingHash;
     int isJumpAnticipPlayingHash;
-    
-    float groundSlopeAngle = 0f;
-    float sideFriction = 0.1f;
-    float distanceToGround = 0f;
+    int isLandingNewWallHash;
+
+    //status
+    Status status;
 
     // Start is called before the first frame update
     void Start()
     {
+        //Slider aSlider = accelerationSlider.GetComponent<Slider>();
+
+        status = Status.falling;//initially falling
+        
+        //start breathing sound and running sound
+        audioManager = FindObjectOfType<AudioManager>();
+        audioManager.Play("breathing", true);
+        audioManager.Play("running", true);
+        
+        //SLIDERs
+        accelerationSlider.maxValue = maxSlider;
+        accelerationSlider.minValue = minSlider;
+        accelerationSlider.value = intitialAcceleration;
+
+        rotationSpeed = intitialRotation;
+        rotationSlider.maxValue = maxSlider;
+        rotationSlider.minValue = minSlider;
+        rotationSlider.value = intitialRotation;
+
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
-        horizontalMove = Vector3.zero;
+        playerRotator = GetComponent<PlayerRotation>();
 
         // set speeds
         deceleration = acceleration * 2f;
         maximumRunVelocity = acceleration;
         maximumWalkVelocity = maximumRunVelocity/2f;
         currentMaxVelocity = maximumWalkVelocity;
-        rotationVelocity = 1f;
-        jumpHeight = 5f;
 
         // set hashes
         VelocityZHash = Animator.StringToHash("Velocity Z");
         VelocityXHash = Animator.StringToHash("Velocity X");
         VelocityYHash = Animator.StringToHash("Velocity Y");
         isJumpingHash = Animator.StringToHash("isJumping");
+        isLandingNewWallHash = Animator.StringToHash("isLandingNewWall");
     }
 
     // Update is called once per frame
     void Update()
     {   
+        // Checks for input from user
         RegisterUserInputs();
-        currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
-        
-
-        // Reset combined movement vector
-        combinedMovement = Vector3.zero;
-        // determine vertical position
-        RaycastHit rayCastHit = RaycastDownwards();
-        isGrounded = distanceToGround < 0.15f;
-        
-        // horizontal movements
-        MovePlayer();
-
-        // jumping and gravity
-        JumpAndGravity();
-
-        isOnSlope = groundSlopeAngle < controller.slopeLimit && groundSlopeAngle >= 1f;
-        isWallrunning = groundSlopeAngle >= controller.slopeLimit;
-        if(isOnSlope) 
-            OnSlopeMovements(rayCastHit.normal);
-        else if (isWallrunning)
-        {
-            // wall run script?
-            slippingMove = Vector3.zero;
-            //
-        }
-        else 
-            slippingMove = Vector3.zero;
-
-
-        // apply the combined movement vector
-        controller.Move(combinedMovement * Time.deltaTime);
-
-
-
-        // displaying text on UI
-        DisplayUI();
-        // assign values to animator parameters
+        // Checks character distance from closest wallpiece and sets isGrounded
+        RecalculateVerticalDistanceInfo();
+        // Calculate the current velocity additions
+        RecalculateVelocities(leftPressed, rightPressed, isGrounded, jumpPressed, backwardPressed, forwardPressed);
+        // Update status
+        UpdateStatus();        
+        // Set audio sounds
+        UpdateStateDependentFeatures(status);
+        // Move the character
+        UpdateMovement();
+        // Assign values to animator parameters
         AssignAnimatorParameters();
     }
+
+    /* ******************* INPUT ****************************************** */
 
     // get input from user and set local variables - true if pressed
     void RegisterUserInputs()
@@ -141,30 +159,122 @@ public class PlayerController : MonoBehaviour
         jumpPressed = Input.GetKey(KeyCode.Space);
     }
 
+    /* ******************* STATUS ****************************************** */
+
+    // Switch between the enum player states
+    void UpdateStatus()
+    {
+        if(!isGrounded && velocityY> 0f){
+            status = Status.jumping;
+        }
+        else if(!isGrounded && velocityY < 0f)
+        {
+            //landing on new wall
+            if(distanceToGround < 1f)
+            {
+                audioManager.PlayOneShot("jumpLand");
+                status = Status.landingOnNewWall;
+            }
+            else status = Status.falling;
+            //landing on same wall
+        }
+        else if(velocityZ > maximumWalkVelocity)
+        {
+            status = Status.running;
+            //playAudio()
+        }
+        else if(velocityZ > 0f)
+            status = Status.walking;
+        else if(velocityZ < 0f)
+            status = Status.walkingBackwards;
+        else
+            status = Status.idle;
+
+        if(isGrounded && jumpPressed)
+        {
+            audioManager.PlayOneShot("jumpStart");
+        }
+    }
+
+    // updating the status dependent features
+    void UpdateStateDependentFeatures(Status status){
+        Debug.Log(status);
+        switch(status)
+        {
+            case Status.idle:
+                break;
+            case Status.idleTurnright:
+                break;
+            case Status.idleTurnLeft:
+                break;
+            case Status.walking:
+                break;
+            case Status.walkingBackwards:
+                break;
+            case Status.running:
+                break;
+            case Status.wallRunning:
+                break;
+            case Status.jumping:
+                break;
+            case Status.falling:
+                break;
+            case Status.landingOnNewWall:
+                break;
+            case Status.landingOnSameWall:
+                break;
+            case Status.dies:
+                break;
+            default:
+                Debug.Log("this shouldn't happen");
+                break;
+        }
+
+        audioManager.SetVolume("running", Mathf.Abs(velocityZ)/2f);
+        audioManager.SetMute("running", !isGrounded);// Do this in statemanager instead
+    }
+
+    /* ******************* POSITION RECALCULATIONS *************************** */
+    void RecalculateVerticalDistanceInfo()
+    {
+        distanceToGround = playerRotator.GetDistanceFromGround();//using the rotator object info
+        isGrounded = distanceToGround < 0.3f;
+    }
+
+    void RecalculateVelocities(bool leftPressed, bool rightPressed,bool isGrounded, bool jumpPressed,bool backwardPressed, bool forwardPressed)
+    {
+        //set the speed limit
+        currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
+
+        // Get the desired velocity addition values
+        RecalculateVelocityX(leftPressed, rightPressed);
+        RecalculateVelocityY(isGrounded, jumpPressed);
+        RecalculateVelocityZ(backwardPressed, forwardPressed);
+    }
     // set new x position
-    void RecalculateVelocityX()
+    void RecalculateVelocityX(bool leftPressed, bool rightPressed)
     {
         // left accelerate
-        if(leftPressed && velocityX > -rotationVelocity)
+        if(leftPressed && velocityX > -rotationSpeed)
         {
             velocityX -= Time.deltaTime * acceleration;
         }
         // clamp left to max
-        if(leftPressed && velocityX < -rotationVelocity)
+        if(leftPressed && velocityX < -rotationSpeed)
         {
             // velocityX = -currentMaxVelocity/2f;
-            velocityX += Time.deltaTime * deceleration;
+            velocityX += Time.deltaTime * deceleration*2f;
         }
         // right accelerate
-        if(rightPressed && velocityX < rotationVelocity)
+        if(rightPressed && velocityX < rotationSpeed)
         {
             velocityX += Time.deltaTime * acceleration;
         }
         // clamp left to max
-        if(rightPressed && velocityX > rotationVelocity)
+        if(rightPressed && velocityX > rotationSpeed)
         {
             // velocityX = currentMaxVelocity/2f;
-            velocityX -= Time.deltaTime * deceleration;
+            velocityX -= Time.deltaTime * deceleration*2f;
         }
         // decelerate
         // note the difference!
@@ -173,12 +283,12 @@ public class PlayerController : MonoBehaviour
             // deceleration from left (turning back from left)
             if(velocityX < 0.0f)
             {
-                velocityX += Time.deltaTime * deceleration;
+                velocityX += Time.deltaTime * deceleration*2f;
             }
             // deceleration from right (turning back from right)
             if(velocityX > 0.0f)
             {
-                velocityX -= Time.deltaTime * deceleration;
+                velocityX -= Time.deltaTime * deceleration*2f;
             }
             // clamp to min
             if(velocityX != 0.0f && (velocityX > -clampingThreshold && velocityX < clampingThreshold))
@@ -187,26 +297,30 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
+    // Player jumps/falls/slipping off a slope
+    void RecalculateVelocityY(bool isGrounded, bool jumpPressed)
+    {   
+        // JUMP make player jump or fall
+        if(isGrounded && !jumpPressed)
+            velocityY = 0f;
+        else if(isGrounded && jumpPressed) {
+            velocityY = jumpHeight;
+        }
+        else
+            velocityY += Gravity * Time.deltaTime;
+    }
     // set new forward position
-    void RecalculateVelocityZ()
+    void RecalculateVelocityZ(bool backwardPressed, bool forwardPressed)
     {
         // early exit if nothing is pressed and standing still
         if(!backwardPressed && !forwardPressed && velocityZ == 0.0f)
             return;
-
-        // // add this if you want to prevent inAir acceleration/deceleration
-        // if(!isGrounded)
-        //     return;
-
         // if forward key pressed, increase velocity in z direction
         if(forwardPressed && velocityZ < currentMaxVelocity)
             velocityZ += Time.deltaTime * acceleration;
-
         // deceleration from forward
         if(!forwardPressed && velocityZ > 0.0f)
             velocityZ -= Time.deltaTime * deceleration;
-
         // decelerate from a higher speed than what's allowed
         if(forwardPressed && velocityZ > currentMaxVelocity)
         {
@@ -243,101 +357,92 @@ public class PlayerController : MonoBehaviour
         {
             velocityZ += Time.deltaTime * deceleration;
         }
-
-    }
-
-    // Player jumps/falls/slipping off a slope
-    void RecalculateVelocityY()
-    {   
-        // JUMP make player jump or fall
-        if(isGrounded && !jumpPressed)
+        
+        // clamp if no button pressed
+        if(!backwardPressed && !forwardPressed && Mathf.Abs(velocityZ) < clampingThreshold)
         {
-            //there is always a small force pulling character to the ground
-            // velocityY = Gravity * Time.deltaTime;
-            velocityY = 0f;
-        }
-        else if(isGrounded && jumpPressed) {
-            velocityY = jumpHeight;
-            // velocityY = Mathf.Lerp(0, jumpHeight, Time.deltaTime);
-        }
-        else
-        {
-            velocityY += Gravity * Time.deltaTime;
+            velocityZ = 0f;
         }
     }
+    
 
+    //update the lock status of the movement
+    public void SetMovementLocked(bool shouldLock)
+    {
+        isMovementLocked = shouldLock;
+    }
+
+    /* ******************* MOVEMENT ****************************************** */
+
+    // physically moving the character
+    void UpdateMovement()
+    {
+        // Reset combined movement vector
+        combinedMovement = Vector3.zero; // (0,0,0)
+        // horizontal movement in Z direction
+        MovePlayer(); // (xDir, 0, zDir)
+        //rotate in X
+        TankRotatePlayer();
+        // jumping and gravity
+        JumpAndGravity(); // (xDir, 0, zDir) --> (xDir, YDIR, zDir) ==> (xDir + jumpXProj, jumpYProj , zDir)  ::: Gravity -- (xDir + jumpXProj- gravXProj, jumpYProj - gravYProj , zDir) (IGNORE)
+        // apply the combined movement vector
+        combinedMovement = transform.TransformDirection(combinedMovement);
+        controller.Move(combinedMovement * Time.deltaTime);
+    }
     // horizontal movement calculations
     void MovePlayer()
     {
-        RecalculateVelocityZ();
         horizontalMove = new Vector3(0, 0, velocityZ * 3f);
-
-        RecalculateVelocityX();
-        transform.Rotate(0, -velocityX, 0);
         
-        horizontalMove = transform.TransformDirection(horizontalMove);
+        // Local to world space translation is required to move in correct direction:
+        // This adds taken movement capability:
+        //horizontalMove = transform.TransformDirection(horizontalMove);
         combinedMovement += horizontalMove;
     }
-
+    // 
+    void TankRotatePlayer()
+    {
+        transform.Rotate(0, -velocityX, 0);
+    }
     // Jump and gravity, vertical movement calcualtions
     void JumpAndGravity()
     {
-        RecalculateVelocityY();
         verticalMove.y = velocityY;
         combinedMovement += verticalMove;
     }
 
-    //
-    void OnSlopeMovements(Vector3 normal)
+
+    /* ******************* USER ADJUSTMENTS ********************************** */
+
+    public void adjustAcceleration(float sliderAcceleration)
     {
-        // check if there is a slipping downwards force
-        if(distanceToGround < 0.3f)
-        {
-            slippingMove.x += (1f - normal.y) * normal.x * (1f - sideFriction);
-            slippingMove.z += (1f - normal.y) * normal.z * (1f - sideFriction);
-            combinedMovement += slippingMove * Time.deltaTime * 30f;
-        }
-        // clearing the slipping movement
-        else if (groundSlopeAngle < 10f || groundSlopeAngle > -10f)
-        {
-            slippingMove = Vector3.zero;
-        }
+        acceleration = sliderAcceleration;
+
+    }
+    public void adjustRotation(float sliderRotation)
+    {
+        rotationSpeed = sliderRotation;
+    }
+    public void adjustMainVolume(float sliderMainVolume)
+    {
+        audioManager.SetVolume("game background music",sliderMainVolume);
     }
 
-    //
-    RaycastHit RaycastDownwards()
-    {
-        RaycastHit rayCastHit;
-        Vector3 p1 = transform.position + controller.center;
+    /* ******************* ANIMATION ****************************************** */
 
-        if(Physics.SphereCast(
-            p1 + new Vector3(0,0.1f,0), 
-            controller.height/2 , 
-            Vector3.down, 
-            out rayCastHit, 
-            10)
-        ){
-            groundSlopeAngle = Vector3.Angle(rayCastHit.normal, Vector3.up);
-            distanceToGround = rayCastHit.distance;
-        }
-
-        return rayCastHit;
-    }
-
-    //
-    void DisplayUI()
-    {
-        distanceText.text = distanceToGround.ToString();;
-        velocityText.text = velocityY.ToString();
-        neVelText.text = groundSlopeAngle.ToString();
-    }
-
-    // 
+    // Assign animation parameters to the animator component
     void AssignAnimatorParameters()
     {
         animator.SetFloat(VelocityXHash, -velocityX);
         animator.SetFloat(VelocityZHash, velocityZ);
         animator.SetFloat(VelocityYHash, distanceToGround);
         animator.SetBool(isJumpingHash, !isGrounded);
+        animator.SetBool(isLandingNewWallHash, status == Status.landingOnNewWall);
     }
+
+    // //collision
+    // void OnControllerColliderHit(ControllerColliderHit hit)
+    // {
+    //     Debug.Log("hey");
+    // }
 }
