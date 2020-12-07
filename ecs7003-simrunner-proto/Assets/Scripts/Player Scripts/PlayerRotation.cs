@@ -10,12 +10,6 @@ public class PlayerRotation : MonoBehaviour {
 	GameObject currentWall;//Reference storing the wall the player is closest to
 	GameObject closestWall;//Reference storing the wall the player is closest to
 
-
-	float t;
-    Quaternion startRotation;
-    Quaternion targetRotation;
-    float timeToReachTarget;
-
 	// Update is called once per frame
 	void Update () {
 		closestWall = (hit.collider) ? hit.transform.gameObject : null;
