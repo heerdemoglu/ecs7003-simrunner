@@ -9,7 +9,7 @@ public enum Status {
     walking, walkingBackwards, 
     running, wallRunning, 
     jumping, falling, 
-    landing,
+    landingOnNewWall, landingOnSameWall,
     dies 
 }
 
@@ -70,6 +70,7 @@ public class PlayerController : MonoBehaviour
     runPressed, 
     jumpPressed,
     isGrounded = false;
+    bool isMovementLocked = false;
 
     // preformance boost - searching by int is faster than by String
     int VelocityZHash;
@@ -77,6 +78,7 @@ public class PlayerController : MonoBehaviour
     int VelocityYHash;
     int isJumpingHash;
     int isJumpAnticipPlayingHash;
+    int isLandingNewWallHash;
 
     //status
     Status status;
@@ -118,6 +120,7 @@ public class PlayerController : MonoBehaviour
         VelocityXHash = Animator.StringToHash("Velocity X");
         VelocityYHash = Animator.StringToHash("Velocity Y");
         isJumpingHash = Animator.StringToHash("isJumping");
+        isLandingNewWallHash = Animator.StringToHash("isLandingNewWall");
     }
 
     // Update is called once per frame
@@ -160,7 +163,17 @@ public class PlayerController : MonoBehaviour
         if(!isGrounded && velocityY> 0f)
             status = Status.jumping;
         else if(!isGrounded && velocityY < 0f)
-            status = Status.falling;
+        {
+            //landing on new wall
+            if(distanceToGround < 1f)
+            {
+                if(playerRotator.DidSwitchWall()) 
+                    status = Status.landingOnNewWall;
+                else status = Status.landingOnSameWall;
+            }
+            else status = Status.falling;
+            //landing on same wall
+        }
         else if(velocityZ > maximumWalkVelocity)
             status = Status.running;
         else if(velocityZ > 0f)
@@ -194,6 +207,10 @@ public class PlayerController : MonoBehaviour
                 break;
             case Status.falling:
                 break;
+            case Status.landingOnNewWall:
+                break;
+            case Status.landingOnSameWall:
+                break;
             case Status.dies:
                 break;
             default:
@@ -218,64 +235,53 @@ public class PlayerController : MonoBehaviour
         currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
 
         // Get the desired velocity addition values
-        RecalculateVelocityX(leftPressed, rightPressed);
+        RecalculateVelocityX_deprecated(leftPressed, rightPressed);
         RecalculateVelocityY(isGrounded, jumpPressed);
         RecalculateVelocityZ(backwardPressed, forwardPressed);
     }
     // set new x position
     void RecalculateVelocityX(bool leftPressed, bool rightPressed)
     {
-        // left accelerate
-        if(leftPressed && !rightPressed)
-        {
-            velocityX = -rotationSpeed;
-        }
-        else if(rightPressed && !leftPressed)
-        {
-            velocityX = rotationSpeed;
-        }
-        else {
+        if(isMovementLocked)
             velocityX = 0f;
-        }
+        // left accelerate
+        else if(leftPressed && !rightPressed)
+            velocityX = -rotationSpeed;
+        else if(rightPressed && !leftPressed)
+            velocityX = rotationSpeed;
+        else
+            velocityX = 0f;
     }
     // Player jumps/falls/slipping off a slope
     void RecalculateVelocityY(bool isGrounded, bool jumpPressed)
     {   
         // JUMP make player jump or fall
         if(isGrounded && !jumpPressed)
-        {
-            //there is always a small force pulling character to the ground
-            // velocityY = Gravity * Time.deltaTime;
             velocityY = 0f;
-        }
         else if(isGrounded && jumpPressed) {
             velocityY = jumpHeight;
-            // velocityY = Mathf.Lerp(0, jumpHeight, Time.deltaTime);
         }
         else
-        {
             velocityY += Gravity * Time.deltaTime;
-        }
     }
     // set new forward position
     void RecalculateVelocityZ(bool backwardPressed, bool forwardPressed)
     {
+        if(isMovementLocked){
+            velocityZ = 0f;
+            return;
+        }
+        if(isGrounded && status == Status.landingOnNewWall) 
+            return;
         // early exit if nothing is pressed and standing still
         if(!backwardPressed && !forwardPressed && velocityZ == 0.0f)
             return;
-
-        // // add this if you want to prevent inAir acceleration/deceleration
-        // if(!isGrounded)
-        //     return;
-
         // if forward key pressed, increase velocity in z direction
         if(forwardPressed && velocityZ < currentMaxVelocity)
             velocityZ += Time.deltaTime * acceleration;
-
         // deceleration from forward
         if(!forwardPressed && velocityZ > 0.0f)
             velocityZ -= Time.deltaTime * deceleration;
-
         // decelerate from a higher speed than what's allowed
         if(forwardPressed && velocityZ > currentMaxVelocity)
         {
@@ -319,8 +325,12 @@ public class PlayerController : MonoBehaviour
             velocityZ = 0f;
         }
     }
-        void RecalculateVelocityX_deprecated(bool leftPressed, bool rightPressed)
+    void RecalculateVelocityX_deprecated(bool leftPressed, bool rightPressed)
     {
+        if(isMovementLocked){
+            velocityX = 0f;
+            return;
+        }
         // left accelerate
         if(leftPressed && velocityX > -rotationSpeed)
         {
@@ -365,6 +375,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    //update the lock status of the movement
+    public void SetMovementLocked(bool shouldLock)
+    {
+        isMovementLocked = shouldLock;
+    }
 
     /* ******************* MOVEMENT ****************************************** */
 
@@ -427,6 +442,7 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat(VelocityZHash, velocityZ);
         animator.SetFloat(VelocityYHash, distanceToGround);
         animator.SetBool(isJumpingHash, !isGrounded);
+        animator.SetBool(isLandingNewWallHash, status == Status.landingOnNewWall);
     }
 
     // //collision

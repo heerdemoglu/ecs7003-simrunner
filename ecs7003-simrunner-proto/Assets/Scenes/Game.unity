@@ -284,7 +284,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 543450653565801567}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 12.651, y: 0, z: 0}
 --- !u!114 &580286498
 MonoBehaviour:
@@ -469,7 +469,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 543450653565801567}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1 &1127790742
 GameObject:
@@ -508,7 +508,7 @@ MonoBehaviour:
     source: {fileID: 0}
     loop: 0
   - name: breathing
-    clip: {fileID: 8300000, guid: e14d594e91d744dfbb10b60a39955c34, type: 3}
+    clip: {fileID: 8300000, guid: 7c2784e18ce0e4e559fd3f5497a13b63, type: 3}
     volume: 0.5
     pitch: 1
     source: {fileID: 0}
@@ -588,36 +588,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1384078211
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1384078212}
-  m_Layer: 0
-  m_Name: RaycastRef
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1384078212
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1384078211}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 543450653565801567}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1471986228
 GameObject:
@@ -940,7 +910,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acceleration: 2.5
-  rotationSpeed: 2
+  rotationSpeed: 2.98
   accelerationSlider: {fileID: 4680507864702925989}
   intitialAcceleration: 2
   rotationSlider: {fileID: 4680507865537214496}
@@ -963,7 +933,7 @@ CharacterController:
   serializedVersion: 2
   m_Height: 2
   m_Radius: 0.5
-  m_SlopeLimit: 85
+  m_SlopeLimit: 180
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
@@ -1040,7 +1010,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 543450653565801567}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &366175167861187547
 Transform:
@@ -1100,7 +1070,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_Children:
-  - {fileID: 1384078212}
   - {fileID: 580286497}
   - {fileID: 1006623745}
   - {fileID: 268055664570379697}
@@ -1847,7 +1816,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 543450653565801567}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &2559285840761523639
 Transform:
@@ -2192,8 +2161,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b20935a25295d946854d800cf1121df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1
-  initialDistance: 15
 --- !u!4 &3222878443646369543
 Transform:
   m_ObjectHideFlags: 0
@@ -7081,7 +7048,7 @@ Transform:
   - {fileID: 8169382868801520628}
   - {fileID: 5742672707719939928}
   m_Father: {fileID: 543450653565801567}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &5477181764049124718
 Transform:

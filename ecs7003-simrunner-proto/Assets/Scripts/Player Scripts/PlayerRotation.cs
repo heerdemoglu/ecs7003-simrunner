@@ -16,15 +16,8 @@ public class PlayerRotation : MonoBehaviour {
 		if(GetDistanceFromGround() < 0.3f) 
 			currentWall = closestWall;
 		else
-			currentWall = null;
+			currentWall = null;			
 
-		if(closestWall != currentWall)
-			Debug.Log("wall switched"+closestWall.GetInstanceID());
-
-		// FindClosestObject();
-		// if(hit.collider) CharacterFaceRelativeToSurface();
-
-		// // OLD way
 		CharacterFaceRelativeToSurface();
 	}
 	
@@ -37,31 +30,8 @@ public class PlayerRotation : MonoBehaviour {
 			surfaceNormal = hit.normal; // Assign the normal of the surface to surfaceNormal
 			forwardRelativeToSurfaceNormal = Vector3.Cross(transform.right, surfaceNormal);
 			Quaternion targetRotation = Quaternion.LookRotation(forwardRelativeToSurfaceNormal, surfaceNormal); //check For target Rotation.
-			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 3f); //Rotate Character accordingly.
+			transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime / GetDistanceFromGround()); //Rotate Character accordingly.
 		}
-	}
-
-	//Emitting a Raycast in 360 degree, we find the closest object (hit with sorthest distance)
-	private void FindClosestObject()
-	{
-		RaycastHit closestHit = new RaycastHit();
-
-		//Check around the character in a 360, 10 times (increase if more accuracy is needed)
-        for(int i=0; i<360; i+= 36){
-			RaycastHit newHit;
-            //Check if anything with the platform layer touches this object
-            if (Physics.Raycast(
-					transform.position, 
-					new Vector3(Mathf.Cos(i), 0, Mathf.Sin(i)), 
-					out newHit, 5)
-			){
-				//keep the hit with the closest distance
-				if(!closestHit.collider || newHit.distance < closestHit.distance) 
-					closestHit = newHit;
-            }
-        }
-		// previousHit = hit;
-		hit = closestHit;
 	}
 
 	//Method For Correct Character Rotation According to Surface.
@@ -94,5 +64,12 @@ public class PlayerRotation : MonoBehaviour {
 		
 		Vector3 result = pointPosition + sb * planeNormal;
 		return Vector3.Distance(pointPosition, result);
+	}
+
+	// returns whether we switches to a new wall with a jump
+	public bool DidSwitchWall()
+	{
+		//.GetInstanceID()
+		return closestWall != currentWall;
 	}
 }
