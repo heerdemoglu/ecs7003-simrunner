@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using EZCameraShake;
 
 public class Chased : MonoBehaviour
 {
@@ -83,6 +84,7 @@ public class Chased : MonoBehaviour
             if (distanceToZone < deathTier)
             {
                 Debug.Log("made contact");
+                CameraShaker.Instance.ShakeOnce(7f, 8f, 8f, 1f);
                 float fadeTime = fade.FadeOut();
                 StartCoroutine(WaitForMe(fadeTime));
                 zone.GetComponent<Zone>().pauseChase();
@@ -91,14 +93,17 @@ public class Chased : MonoBehaviour
             else if (distanceToZone < nearTier)
             {
                 Debug.Log("Within nearTier");
+                CameraShaker.Instance.ShakeOnce(3f, 2f, 3f, 1f);
             }
             else if (distanceToZone < midTier)
             {
                 Debug.Log("Within midTier");
+                CameraShaker.Instance.ShakeOnce(3f, 2f, 3f, 1f);
             }
             else
             {
                 Debug.Log("Within farTier");
+                CameraShaker.Instance.ShakeOnce(2f, 1f, 2f, 1f);
             }
         }
         else
