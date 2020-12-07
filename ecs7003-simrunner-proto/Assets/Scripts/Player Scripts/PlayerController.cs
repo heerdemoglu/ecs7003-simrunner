@@ -235,22 +235,55 @@ public class PlayerController : MonoBehaviour
         currentMaxVelocity = runPressed ? maximumRunVelocity : maximumWalkVelocity;
 
         // Get the desired velocity addition values
-        RecalculateVelocityX_deprecated(leftPressed, rightPressed);
+        RecalculateVelocityX(leftPressed, rightPressed);
         RecalculateVelocityY(isGrounded, jumpPressed);
         RecalculateVelocityZ(backwardPressed, forwardPressed);
     }
     // set new x position
     void RecalculateVelocityX(bool leftPressed, bool rightPressed)
     {
-        if(isMovementLocked)
-            velocityX = 0f;
         // left accelerate
-        else if(leftPressed && !rightPressed)
-            velocityX = -rotationSpeed;
-        else if(rightPressed && !leftPressed)
-            velocityX = rotationSpeed;
-        else
-            velocityX = 0f;
+        if(leftPressed && velocityX > -rotationSpeed)
+        {
+            velocityX -= Time.deltaTime * acceleration;
+        }
+        // clamp left to max
+        if(leftPressed && velocityX < -rotationSpeed)
+        {
+            // velocityX = -currentMaxVelocity/2f;
+            velocityX += Time.deltaTime * deceleration;
+        }
+        // right accelerate
+        if(rightPressed && velocityX < rotationSpeed)
+        {
+            velocityX += Time.deltaTime * acceleration;
+        }
+        // clamp left to max
+        if(rightPressed && velocityX > rotationSpeed)
+        {
+            // velocityX = currentMaxVelocity/2f;
+            velocityX -= Time.deltaTime * deceleration;
+        }
+        // decelerate
+        // note the difference!
+        if(!leftPressed && !rightPressed)
+        {
+            // deceleration from left (turning back from left)
+            if(velocityX < 0.0f)
+            {
+                velocityX += Time.deltaTime * deceleration;
+            }
+            // deceleration from right (turning back from right)
+            if(velocityX > 0.0f)
+            {
+                velocityX -= Time.deltaTime * deceleration;
+            }
+            // clamp to min
+            if(velocityX != 0.0f && (velocityX > -clampingThreshold && velocityX < clampingThreshold))
+            {
+                velocityX = 0.0f;
+            }
+        }
     }
     // Player jumps/falls/slipping off a slope
     void RecalculateVelocityY(bool isGrounded, bool jumpPressed)
@@ -267,12 +300,6 @@ public class PlayerController : MonoBehaviour
     // set new forward position
     void RecalculateVelocityZ(bool backwardPressed, bool forwardPressed)
     {
-        if(isMovementLocked){
-            velocityZ = 0f;
-            return;
-        }
-        if(isGrounded && status == Status.landingOnNewWall) 
-            return;
         // early exit if nothing is pressed and standing still
         if(!backwardPressed && !forwardPressed && velocityZ == 0.0f)
             return;
@@ -325,55 +352,7 @@ public class PlayerController : MonoBehaviour
             velocityZ = 0f;
         }
     }
-    void RecalculateVelocityX_deprecated(bool leftPressed, bool rightPressed)
-    {
-        if(isMovementLocked){
-            velocityX = 0f;
-            return;
-        }
-        // left accelerate
-        if(leftPressed && velocityX > -rotationSpeed)
-        {
-            velocityX -= Time.deltaTime * acceleration;
-        }
-        // clamp left to max
-        if(leftPressed && velocityX < -rotationSpeed)
-        {
-            // velocityX = -currentMaxVelocity/2f;
-            velocityX += Time.deltaTime * deceleration;
-        }
-        // right accelerate
-        if(rightPressed && velocityX < rotationSpeed)
-        {
-            velocityX += Time.deltaTime * acceleration;
-        }
-        // clamp left to max
-        if(rightPressed && velocityX > rotationSpeed)
-        {
-            // velocityX = currentMaxVelocity/2f;
-            velocityX -= Time.deltaTime * deceleration;
-        }
-        // decelerate
-        // note the difference!
-        if(!leftPressed && !rightPressed)
-        {
-            // deceleration from left (turning back from left)
-            if(velocityX < 0.0f)
-            {
-                velocityX += Time.deltaTime * deceleration;
-            }
-            // deceleration from right (turning back from right)
-            if(velocityX > 0.0f)
-            {
-                velocityX -= Time.deltaTime * deceleration;
-            }
-            // clamp to min
-            if(velocityX != 0.0f && (velocityX > -clampingThreshold && velocityX < clampingThreshold))
-            {
-                velocityX = 0.0f;
-            }
-        }
-    }
+    
 
     //update the lock status of the movement
     public void SetMovementLocked(bool shouldLock)
