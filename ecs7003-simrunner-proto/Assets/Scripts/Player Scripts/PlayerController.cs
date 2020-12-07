@@ -9,6 +9,7 @@ public enum Status {
     walking, walkingBackwards, 
     running, wallRunning, 
     jumping, falling, 
+    landing,
     dies 
 }
 
