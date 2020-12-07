@@ -123,6 +123,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &226075856
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 226075857}
+  m_Layer: 0
+  m_Name: CamerContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &226075857
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 226075856}
+  m_LocalRotation: {x: 0.11017968, y: -0, z: -0, w: 0.9939117}
+  m_LocalPosition: {x: 0, y: 3.7400005, z: -5.7799997}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 580286497}
+  m_Father: {fileID: 543450653565801567}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &363763067
 GameObject:
   m_ObjectHideFlags: 0
@@ -214,6 +245,7 @@ GameObject:
   - component: {fileID: 580286496}
   - component: {fileID: 580286495}
   - component: {fileID: 580286498}
+  - component: {fileID: 580286499}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -279,12 +311,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 580286494}
-  m_LocalRotation: {x: 0.11017968, y: -0, z: -0, w: 0.9939117}
-  m_LocalPosition: {x: 0, y: 3.74, z: -5.78}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 543450653565801567}
-  m_RootOrder: 1
+  m_Father: {fileID: 226075857}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 12.651, y: 0, z: 0}
 --- !u!114 &580286498
 MonoBehaviour:
@@ -300,6 +332,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fadeTime: 1.5
   fadeTexture: {fileID: 2800000, guid: d4672e0793f2a1d418d734355aa04d54, type: 3}
+--- !u!114 &580286499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 580286494}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ab8353b5ebd32545867da143199a814, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DefaultPosInfluence: {x: 0.15, y: 0.15, z: 0.15}
+  DefaultRotInfluence: {x: 1, y: 1, z: 1}
+  RestPositionOffset: {x: 0, y: 0, z: 0}
+  RestRotationOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &601888055
 GameObject:
   m_ObjectHideFlags: 0
@@ -582,7 +630,7 @@ MonoBehaviour:
   sounds:
   - name: game background music
     clip: {fileID: 8300000, guid: e14d594e91d744dfbb10b60a39955c34, type: 3}
-    volume: 0.5
+    volume: 0
     pitch: 1
     source: {fileID: 0}
     loop: 0
@@ -1180,7 +1228,7 @@ Transform:
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_Children:
   - {fileID: 1384078212}
-  - {fileID: 580286497}
+  - {fileID: 226075857}
   - {fileID: 1006623745}
   - {fileID: 268055664570379697}
   - {fileID: 2484128538627233648}

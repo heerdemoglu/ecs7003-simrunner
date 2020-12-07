@@ -9,10 +9,8 @@ public class Chased : MonoBehaviour
     private float originalIntensity;
     //zone light
     public GameObject zoneLight;
-    //private Color originalColor;
-    //public Color zoneLightColor;
+
     public float highestIntensity = 4f;
-    //private float lowestIntensity = 0f;
 
     private Light zlight;
 
@@ -29,6 +27,7 @@ public class Chased : MonoBehaviour
     private float nearTier;
     public float deathTier;
     public float tierRange;
+    //private float multiplier;
 
     // Start is called before the first frame update
     void Start()
@@ -49,11 +48,7 @@ public class Chased : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            CameraShaker.Instance.ShakeOnce(4f, 4f, 1f, 1f);
-        }
-        
+
         float zoneZ = zone.transform.position.z;
         distanceToZone = Mathf.Abs(transform.position.z - zoneZ);
         
@@ -65,28 +60,28 @@ public class Chased : MonoBehaviour
 
             if(transform.position.y < -0.05f)
             {
-                Debug.Log("fell off");
                 zone.GetComponent<Zone>().pauseChase();
                 gameController.gameOver();
             }
 
             if (distanceToZone < deathTier)
             {
-                Debug.Log("made contact");
+
+                CameraShaker.Instance.ShakeOnce(7f, 8f , 8f, 5f);
                 zone.GetComponent<Zone>().pauseChase();
                 gameController.gameOver();
             }
             else if (distanceToZone < nearTier)
             {
-                Debug.Log("Within nearTier");
+                CameraShaker.Instance.ShakeOnce(3f, 2f, 3f, 1f);
             }
             else if (distanceToZone < midTier)
             {
-                Debug.Log("Within midTier");
+                CameraShaker.Instance.ShakeOnce(3f, 2f, 3f, 1f);
             }
             else
             {
-                Debug.Log("Within farTier");
+                CameraShaker.Instance.ShakeOnce(2f, 1f, 2f, 1f);
             }
         }
         else
@@ -95,15 +90,8 @@ public class Chased : MonoBehaviour
             zlight.intensity = Mathf.Lerp(zlight.intensity,0f,1); ;
             glight.intensity = Mathf.Lerp(glight.intensity, originalIntensity, 1);
         }
-
-        Debug.DrawLine(transform.position, zone.transform.position, Color.red);
     }
 
-    private void OnDrawGizmos()
-    {
-        GameObject zon = GameObject.FindGameObjectWithTag("Zone");
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position, zon.transform.position);
-    }
+
     
 }
