@@ -18,8 +18,12 @@ public class Chased : MonoBehaviour
     private Light zlight;
 
     public Camera cam;
-   // private Fade fade;
+    // private Fade fade;
 
+    public float shake1;
+    public float shake2;
+    public float shake3;
+    public float shake4;
 
     private GameController gameController;
     private GameObject zone;
@@ -38,7 +42,9 @@ public class Chased : MonoBehaviour
     void Start()
     {
         //fade = cam.GetComponent<Fade>();
-
+        if (Input.GetMouseButtonDown(0)){
+            CameraShaker.Instance.ShakeOnce(shake1, shake2, shake3, shake4);
+        }
         zlight = zoneLight.GetComponent<Light>();
         glight = gameLight.GetComponent<Light>();
         zlight.intensity = 0f;
@@ -79,6 +85,7 @@ public class Chased : MonoBehaviour
                 //yield return new WaitForSeconds(fadeTime);
                 zone.GetComponent<Zone>().pauseChase();
                 gameController.gameOver();
+                Destroy(gameObject);
             }
 
             if (distanceToZone < deathTier)
