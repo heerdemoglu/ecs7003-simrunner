@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using EZCameraShake;
 public class Chased : MonoBehaviour
 {
     public GameObject gameLight;
@@ -49,7 +49,11 @@ public class Chased : MonoBehaviour
     }
     void Update()
     {
-
+        if (Input.GetMouseButtonDown(0))
+        {
+            CameraShaker.Instance.ShakeOnce(4f, 4f, 1f, 1f);
+        }
+        
         float zoneZ = zone.transform.position.z;
         distanceToZone = Mathf.Abs(transform.position.z - zoneZ);
         
