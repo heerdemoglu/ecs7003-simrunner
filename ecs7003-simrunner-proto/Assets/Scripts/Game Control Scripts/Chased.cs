@@ -18,7 +18,7 @@ public class Chased : MonoBehaviour
     private Light zlight;
 
     public Camera cam;
-    private Fade fade;
+   // private Fade fade;
 
 
     private GameController gameController;
@@ -37,7 +37,7 @@ public class Chased : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        fade = cam.GetComponent<Fade>();
+        //fade = cam.GetComponent<Fade>();
 
         zlight = zoneLight.GetComponent<Light>();
         glight = gameLight.GetComponent<Light>();
@@ -74,8 +74,8 @@ public class Chased : MonoBehaviour
             if(transform.position.y < -0.05f)
             {
                 Debug.Log("fell off");
-                float fadeTime = fade.FadeOut();
-                StartCoroutine(WaitForMe(fadeTime));
+                //float fadeTime = fade.FadeOut();
+                //StartCoroutine(WaitForMe(fadeTime));
                 //yield return new WaitForSeconds(fadeTime);
                 zone.GetComponent<Zone>().pauseChase();
                 gameController.gameOver();
@@ -84,16 +84,16 @@ public class Chased : MonoBehaviour
             if (distanceToZone < deathTier)
             {
                 Debug.Log("made contact");
-                CameraShaker.Instance.ShakeOnce(7f, 8f, 8f, 1f);
-                float fadeTime = fade.FadeOut();
-                StartCoroutine(WaitForMe(fadeTime));
+                CameraShaker.Instance.ShakeOnce(3f, 4f, 1f, 1f);
+                //float fadeTime = fade.FadeOut();
+                //StartCoroutine(WaitForMe(fadeTime));
                 zone.GetComponent<Zone>().pauseChase();
                 gameController.gameOver();
             }
             else if (distanceToZone < nearTier)
             {
                 Debug.Log("Within nearTier");
-                CameraShaker.Instance.ShakeOnce(3f, 2f, 3f, 1f);
+                CameraShaker.Instance.ShakeOnce(3f, 2f, 1f, 1f);
             }
             else if (distanceToZone < midTier)
             {
