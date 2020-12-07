@@ -44,8 +44,30 @@ public class AudioManager : MonoBehaviour
             Debug.Log("No auido source attached to "+name);
             return;//early exit if no sound attached
         }
-        s.source.Play();
+        if(!s.source.isPlaying) s.source.Play();
         if(loop) s.source.loop = true;
+    }
+
+    //starts the playback of sound with given name
+    public void PlayOneShot(string name)
+    {
+        Sound s = Array.Find(sounds, sound => sound.name == name);//look up array
+        if(s == null){
+            Debug.Log("No auido source attached to "+name);
+            return;//early exit if no sound attached
+        }
+        if(!s.source.isPlaying) s.source.PlayOneShot(s.clip, 1f);
+    }
+
+    //stops the playback
+    public void Stop(string name)
+    {
+        Sound s = Array.Find(sounds, sound => sound.name == name);//look up array
+        if(s == null){
+            Debug.Log("No auido source attached to "+name);
+            return;//early exit if no sound attached
+        }
+        s.source.Stop();
     }
 
     public void SetVolume(string name, float target)

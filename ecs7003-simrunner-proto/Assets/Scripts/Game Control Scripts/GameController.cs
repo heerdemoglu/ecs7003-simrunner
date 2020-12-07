@@ -112,18 +112,18 @@ public class GameController : MonoBehaviour
     {
         settingPanel.SetActive(false);
     }
-    //public void setAcceleration(float sliderAcceleration)
-    //{
+    // public void setAcceleration(float sliderAcceleration)
+    // {
     //    GameObject player = GameObject.FindGameObjectWithTag("Player");
     //    player.GetComponent<PlayerController>().acceleration = sliderAcceleration;
 
-    //}
-    //public void setRotation(float sliderRotation)
-    //{
+    // }
+    // public void setRotation(float sliderRotation)
+    // {
     //    GameObject player = GameObject.FindGameObjectWithTag("Player");
     //    player.GetComponent<PlayerController>().rotationSpeed = sliderRotation;
 
-    //}
+    // }
 
 
 }

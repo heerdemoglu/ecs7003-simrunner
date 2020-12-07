@@ -519,6 +519,18 @@ MonoBehaviour:
     pitch: 1
     source: {fileID: 0}
     loop: 1
+  - name: jumpStart
+    clip: {fileID: 8300000, guid: 9f47f7f3441a14407b5e377d75847af1, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 1
+  - name: jumpLand
+    clip: {fileID: 8300000, guid: 6f5e0e26161d74abf8c8f0c5ab4aad5e, type: 3}
+    volume: 0.5
+    pitch: 1
+    source: {fileID: 0}
+    loop: 0
 --- !u!4 &1127790744
 Transform:
   m_ObjectHideFlags: 0
@@ -911,6 +923,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   acceleration: 2.5
   rotationSpeed: 2.98
+  mainVolume: 0
   accelerationSlider: {fileID: 4680507864702925989}
   intitialAcceleration: 2
   rotationSlider: {fileID: 4680507865537214496}
@@ -6862,10 +6875,22 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0
+  m_Value: 0.5
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2050734792}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: adjustMainVolume
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: adjustMainVolume
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4680507865706272040
 GameObject:
   m_ObjectHideFlags: 0

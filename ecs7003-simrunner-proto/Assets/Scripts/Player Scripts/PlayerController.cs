@@ -25,6 +25,10 @@ public class PlayerController : MonoBehaviour
     // rotation speed
     [Range(2f, 4f)]
     public float rotationSpeed;
+    
+    // rotation speed
+    [Range(0f, 1f)]
+    public float mainVolume;
 
     //settings sliders
     public Slider accelerationSlider;
@@ -160,28 +164,36 @@ public class PlayerController : MonoBehaviour
     // Switch between the enum player states
     void UpdateStatus()
     {
-        if(!isGrounded && velocityY> 0f)
+        if(!isGrounded && velocityY> 0f){
             status = Status.jumping;
+        }
         else if(!isGrounded && velocityY < 0f)
         {
             //landing on new wall
             if(distanceToGround < 1f)
             {
-                if(playerRotator.DidSwitchWall()) 
-                    status = Status.landingOnNewWall;
-                else status = Status.landingOnSameWall;
+                audioManager.PlayOneShot("jumpLand");
+                status = Status.landingOnNewWall;
             }
             else status = Status.falling;
             //landing on same wall
         }
         else if(velocityZ > maximumWalkVelocity)
+        {
             status = Status.running;
+            //playAudio()
+        }
         else if(velocityZ > 0f)
             status = Status.walking;
         else if(velocityZ < 0f)
             status = Status.walkingBackwards;
         else
             status = Status.idle;
+
+        if(isGrounded && jumpPressed)
+        {
+            audioManager.PlayOneShot("jumpStart");
+        }
     }
 
     // updating the status dependent features
@@ -251,7 +263,7 @@ public class PlayerController : MonoBehaviour
         if(leftPressed && velocityX < -rotationSpeed)
         {
             // velocityX = -currentMaxVelocity/2f;
-            velocityX += Time.deltaTime * deceleration;
+            velocityX += Time.deltaTime * deceleration*2f;
         }
         // right accelerate
         if(rightPressed && velocityX < rotationSpeed)
@@ -262,7 +274,7 @@ public class PlayerController : MonoBehaviour
         if(rightPressed && velocityX > rotationSpeed)
         {
             // velocityX = currentMaxVelocity/2f;
-            velocityX -= Time.deltaTime * deceleration;
+            velocityX -= Time.deltaTime * deceleration*2f;
         }
         // decelerate
         // note the difference!
@@ -271,12 +283,12 @@ public class PlayerController : MonoBehaviour
             // deceleration from left (turning back from left)
             if(velocityX < 0.0f)
             {
-                velocityX += Time.deltaTime * deceleration;
+                velocityX += Time.deltaTime * deceleration*2f;
             }
             // deceleration from right (turning back from right)
             if(velocityX > 0.0f)
             {
-                velocityX -= Time.deltaTime * deceleration;
+                velocityX -= Time.deltaTime * deceleration*2f;
             }
             // clamp to min
             if(velocityX != 0.0f && (velocityX > -clampingThreshold && velocityX < clampingThreshold))
@@ -410,6 +422,10 @@ public class PlayerController : MonoBehaviour
     public void adjustRotation(float sliderRotation)
     {
         rotationSpeed = sliderRotation;
+    }
+    public void adjustMainVolume(float sliderMainVolume)
+    {
+        audioManager.SetVolume("game background music",sliderMainVolume);
     }
 
     /* ******************* ANIMATION ****************************************** */
