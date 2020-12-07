@@ -253,7 +253,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 30
+  far clip plane: 50
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -1201,6 +1201,7 @@ MonoBehaviour:
   gameLight: {fileID: 1006623743}
   zoneLight: {fileID: 2214189307152676217}
   highestIntensity: 4
+  cam: {fileID: 580286496}
   distanceToZone: 0
   deathTier: 1
   tierRange: 2
@@ -4019,7 +4020,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'SIMULATION TERMINATED!!!
+  m_Text: 'AUTHENTICATION FAILED.
 
 '
 --- !u!1 &4680507864263914079
@@ -4522,7 +4523,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ' Start new simulation?'
+  m_Text: TRY AGAIN?
 --- !u!1 &4680507864501877045
 GameObject:
   m_ObjectHideFlags: 0
