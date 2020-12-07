@@ -2195,20 +2195,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   acceleration: 0
   rotationSpeed: 0
+  mainVolume: 0
   accelerationSlider: {fileID: 0}
   intitialAcceleration: 2
   rotationSlider: {fileID: 0}
   intitialRotation: 0.3
   maxSlider: 4
   minSlider: 1
+  audioManager: {fileID: 0}
+  playerRotator: {fileID: 0}
   Gravity: -9.81
-  isWallrunning: 0
-  isOnSlope: 0
-  raycastReference: {fileID: 1945777037}
-  distanceText: {fileID: 0}
-  velocityText: {fileID: 0}
-  neVelText: {fileID: 0}
-  myMesh: {fileID: 1082271958138677758}
 --- !u!4 &1031632034761452098
 Transform:
   m_ObjectHideFlags: 0
