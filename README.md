@@ -3,6 +3,8 @@
 ## Project Members:
 Hasan Emre Erdemoglu, Mate Krisztian, Xsara Baptiste-Wilson
 
+## Gameplay video: TBA
+
 ## About Simula:
 
 You are at work, coding an application. The application glitches and throws you into a simulation. The simulation starts to collapse behind you and the only option is to move forward and try to escape, jumping between platforms and defeating enemies in order to avoid the collapse of the system.
@@ -10,9 +12,14 @@ You are at work, coding an application. The application glitches and throws you 
 How long can you survive?
 
 ## About Game Prototype:
-The prototype for this project can be found in ecs7003-simrunner-proto. The default branch for this repository is development branch; however the final submission of this project can be found in main branch.
+The prototype for this project can be found in ecs7003-simrunner-proto. The prototype is on the prototype branch.
 
-As final project will involve different maps; it will be shared within another folder. For more information, please check the readme within that folder. More information and the free asset used on the prototype and the final project can be found in their respective folders.
+## About Final Game:
+The final game for this project can be found in ecs7003-simrunner-proto. Make sure that you are in main branch to have the correct project. 
+
+## About Game Controls and More:
+
+Please see the documentation attached to main directory of this repository.
 
 ## Free Assets Used on the Project:
-Please see the respective folders for more information.
+Please see the respective folders and documentation for additional information.
