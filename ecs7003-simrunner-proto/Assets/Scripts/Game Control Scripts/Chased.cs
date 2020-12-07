@@ -16,6 +16,9 @@ public class Chased : MonoBehaviour
 
     private Light zlight;
 
+    public Camera cam;
+    private Fade fade;
+
 
     private GameController gameController;
     private GameObject zone;
@@ -33,6 +36,7 @@ public class Chased : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        fade = cam.GetComponent<Fade>();
 
         zlight = zoneLight.GetComponent<Light>();
         glight = gameLight.GetComponent<Light>();
@@ -47,6 +51,13 @@ public class Chased : MonoBehaviour
         midTier = nearTier + tierRange;
         farTier = midTier + tierRange;
     }
+
+    private IEnumerator WaitForMe(float fadeTime)
+    {
+        // process pre-yield
+        yield return new WaitForSeconds(fadeTime);
+    }
+
     void Update()
     {
 
@@ -59,9 +70,21 @@ public class Chased : MonoBehaviour
             zlight.intensity = Mathf.Lerp(0, highestIntensity, 1f - (distanceToZone / farTier));
             glight.intensity = Mathf.Lerp(originalIntensity, 0f, 1f - (distanceToZone / farTier));
 
+            if(transform.position.y < -0.05f)
+            {
+                Debug.Log("fell off");
+                float fadeTime = fade.FadeOut();
+                StartCoroutine(WaitForMe(fadeTime));
+                //yield return new WaitForSeconds(fadeTime);
+                zone.GetComponent<Zone>().pauseChase();
+                gameController.gameOver();
+            }
+
             if (distanceToZone < deathTier)
             {
                 Debug.Log("made contact");
+                float fadeTime = fade.FadeOut();
+                StartCoroutine(WaitForMe(fadeTime));
                 zone.GetComponent<Zone>().pauseChase();
                 gameController.gameOver();
             }

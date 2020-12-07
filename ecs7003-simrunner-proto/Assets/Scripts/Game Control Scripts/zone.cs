@@ -27,7 +27,14 @@ public class Zone : MonoBehaviour
         {
             transform.position = transform.position + (Vector3.forward * acceleration * speed * Time.deltaTime);
         }
+
+
+        if (transform.position.z % 50 == 0)
+        {
+            speed += 0.01f;
     }
+    }
+        
 
     public void beginChase()
     {
