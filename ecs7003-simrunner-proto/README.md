@@ -26,13 +26,17 @@ Link: https://assetstore.unity.com/packages/2d/textures-materials/gridbox-protot
 Some of the game audio (background music) is developed by us. The following website was used to generate Text to Speech voiceovers:
 Link: https://wideo.co/text-to-speech/
 
+These audio effects are taken from the following links, downloading was free:
+Walking Sounds Link: https://freesound.org/people/InspectorJ/sounds/421022/
+Human Breathing Sounds: https://freesound.org/people/SoundMarnus/sounds/491762/
+
 ### Character Model & Animations:
 
 The character model is taken from the following link:
-Link: TBA
+Link: mixamo.com (Ybot)
 
 The animations are taken from the following link:
-Link: TBA
+Link: mixamo.com
 
 ## Inactive (Other) Assets in the Repository: (Used in Prototyping Stage)
 Sci-fi Texture Pack 1: https://assetstore.unity.com/packages/2d/textures-materials/sci-fi-texture-pack-1-23301
