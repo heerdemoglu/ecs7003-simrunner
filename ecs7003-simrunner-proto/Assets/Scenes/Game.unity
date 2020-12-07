@@ -1233,6 +1233,10 @@ MonoBehaviour:
   zoneLight: {fileID: 2214189307152676217}
   highestIntensity: 4
   cam: {fileID: 580286496}
+  shake1: 2
+  shake2: 2
+  shake3: 1
+  shake4: 1
   distanceToZone: 0
   deathTier: 1
   tierRange: 2

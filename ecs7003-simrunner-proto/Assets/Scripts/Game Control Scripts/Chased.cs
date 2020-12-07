@@ -85,13 +85,13 @@ public class Chased : MonoBehaviour
                 //yield return new WaitForSeconds(fadeTime);
                 zone.GetComponent<Zone>().pauseChase();
                 gameController.gameOver();
-                Destroy(gameObject);
+                //Destroy(gameObject);
             }
 
             if (distanceToZone < deathTier)
             {
                 Debug.Log("made contact");
-                CameraShaker.Instance.ShakeOnce(3f, 4f, 1f, 1f);
+                //CameraShaker.Instance.ShakeOnce(1f, 1f, 1f, 1f);
                 //float fadeTime = fade.FadeOut();
                 //StartCoroutine(WaitForMe(fadeTime));
                 zone.GetComponent<Zone>().pauseChase();
@@ -100,17 +100,17 @@ public class Chased : MonoBehaviour
             else if (distanceToZone < nearTier)
             {
                 Debug.Log("Within nearTier");
-                CameraShaker.Instance.ShakeOnce(3f, 2f, 1f, 1f);
+                //CameraShaker.Instance.ShakeOnce(1.2f, 1.2f, 1f, 1f);
             }
             else if (distanceToZone < midTier)
             {
                 Debug.Log("Within midTier");
-                CameraShaker.Instance.ShakeOnce(3f, 2f, 3f, 1f);
+                //CameraShaker.Instance.ShakeOnce(1f, 1f, 1f, 1f);
             }
             else
             {
                 Debug.Log("Within farTier");
-                CameraShaker.Instance.ShakeOnce(2f, 1f, 2f, 1f);
+                //CameraShaker.Instance.ShakeOnce(1f, 1f, 1f, 1f);
             }
         }
         else
